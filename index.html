@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Very Important Question</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #fde5df 0%, #fad5eb 100%);
+            --text-dark: #3a1c20;
+            --accent-pink: #eb4363;
+            --card-bg: rgba(255, 255, 255, 0.45);
+            --card-hover: rgba(255, 255, 255, 0.8);
+            --selected-bg: #3a1c20;
+            --selected-text: #fff;
+            --transition-smooth: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--bg-gradient);
+            font-family: 'Inter', sans-serif;
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .step {
+            display: none;
+            width: 100%;
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 30px;
+            padding: 40px 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            animation: scaleIn 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            box-sizing: border-box;
+        }
+
+        .step.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.95) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* Staggered Animations for children */
+        .animate-up {
+            opacity: 0;
+            animation: slideUp 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.8rem;
+            margin: 10px 0;
+            line-height: 1.2;
+        }
+
+        h1 span {
+            color: var(--accent-pink);
+            font-style: italic;
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            opacity: 0.75;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .overline {
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 600;
+            opacity: 0.6;
+            margin-bottom: 10px;
+        }
+
+        /* --- Buttons --- */
+        .btn-primary {
+            background-color: var(--accent-pink);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 14px 35px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            box-shadow: 0 8px 15px rgba(235, 67, 99, 0.2);
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 20px rgba(235, 67, 99, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(1px) scale(0.98);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            background-color: #d1b5bc;
+        }
+
+        .btn-secondary {
+            background-color: #f7d3c8;
+            color: var(--text-dark);
+            border: none;
+            border-radius: 30px;
+            padding: 14px 35px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        /* Step 1 Buttons */
+        .step-1-btns {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        #no-btn {
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        /* Step 2 & 3 Grids */
+        .section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin: 25px 0 15px;
+            font-weight: 600;
+            opacity: 0.8;
+            width: 100%;
+            text-align: left;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .option-card {
+            background: var(--card-bg);
+            border: 2px solid transparent;
+            border-radius: 16px;
+            padding: 15px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .option-card:hover {
+            background: var(--card-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        }
+
+        .option-card:active {
+            transform: scale(0.97);
+        }
+
+        .option-card.selected {
+            background: var(--selected-bg);
+            color: var(--selected-text);
+            border-color: var(--selected-bg);
+            transform: scale(0.98);
+            box-shadow: 0 5px 15px rgba(58, 28, 32, 0.2);
+        }
+
+        .option-title { font-weight: 600; font-size: 1rem; margin-bottom: 5px; }
+        .option-desc { font-size: 0.75rem; opacity: 0.8; line-height: 1.3; }
+
+        /* Dates Horizontal */
+        .dates-container {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            width: 100%;
+            scrollbar-width: none; /* Firefox */
+        }
+        .dates-container::-webkit-scrollbar { display: none; } /* Chrome */
+
+        .date-card {
+            min-width: 65px;
+            text-align: center;
+            padding: 12px 10px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            border: 2px solid transparent;
+        }
+        
+        .date-card:hover {
+            background: var(--card-hover);
+            transform: translateY(-2px);
+        }
+
+        .date-card.selected {
+            background: var(--accent-pink);
+            color: white;
+            transform: scale(0.95);
+            box-shadow: 0 8px 15px rgba(235, 67, 99, 0.3);
+        }
+
+        .date-day { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8;}
+        .date-num { font-size: 1.4rem; font-weight: bold; font-family: 'Playfair Display', serif; margin: 4px 0;}
+        .date-month { font-size: 0.7rem; opacity: 0.8;}
+
+        .continue-btn {
+            margin-top: 35px;
+        }
+
+        .emoji { margin-right: 5px; font-size: 1.2rem; vertical-align: middle; }
+        
+        /* Food Grid alignment */
+        #food-container .option-card {
+            align-items: center;
+            text-align: center;
+            padding: 20px 10px;
+        }
+        #food-container .option-card .emoji { margin: 0 0 8px 0; font-size: 1.8rem; }
+    </style>
+</head>
+<body>
+
+    <!-- STEP 1: The Question -->
+    <div id="step1" class="step active">
+        <div class="overline animate-up">A VERY IMPORTANT QUESTION</div>
+        <h1 class="animate-up delay-1">Will you go on a <span>date</span><br>with me?</h1>
+        <div class="subtitle animate-up delay-2">Take your time. Choose carefully.<br>There is definitely a right answer.</div>
+        
+        <div class="step-1-btns animate-up delay-3">
+            <button class="btn-primary" style="width: auto;" onclick="goToStep(2)">Yes 💕</button>
+            <button id="no-btn" class="btn-secondary">No 🥺</button>
+        </div>
+    </div>
+
+    <!-- STEP 2: Pick a Time -->
+    <div id="step2" class="step">
+        <h1 class="animate-up">Pick a <span>time</span>.</h1>
+        <div class="subtitle animate-up delay-1">You said yes (legally binding). Now the fun part — when are we doing this?</div>
+
+        <div class="section-title animate-up delay-1">DAY</div>
+        <div class="dates-container animate-up delay-2" id="days-container">
+            <!-- Generated via JS -->
+        </div>
+
+        <div class="section-title animate-up delay-2">TIME</div>
+        <div class="options-grid animate-up delay-3" id="times-container">
+            <div class="option-card" onclick="selectOption('time', '5:00 PM', this)">
+                <div class="option-title">5:00 PM</div>
+                <div class="option-desc">are we eating at a retirement home?</div>
+            </div>
+            <div class="option-card" onclick="selectOption('time', '7:00 PM', this)">
+                <div class="option-title">7:00 PM</div>
+                <div class="option-desc">respectable. suspiciously respectable.</div>
+            </div>
+            <div class="option-card" onclick="selectOption('time', '8:00 PM', this)">
+                <div class="option-title">8:00 PM</div>
+                <div class="option-desc">fair warning, I might be hangry</div>
+            </div>
+            <div class="option-card" onclick="selectOption('time', '9:00 PM', this)">
+                <div class="option-title">9:00 PM</div>
+                <div class="option-desc">this is past my bedtime</div>
+            </div>
+        </div>
+
+        <div class="section-title animate-up delay-3">WHAT ARE WE DOING?</div>
+        <div class="options-grid animate-up delay-4" id="activities-container">
+            <div class="option-card" onclick="selectOption('activity', 'Food', this)">
+                <div class="option-title"><span class="emoji">🍝</span> Food</div>
+            </div>
+            <div class="option-card" onclick="selectOption('activity', 'Drinks', this)">
+                <div class="option-title"><span class="emoji">🍹</span> Drinks</div>
+            </div>
+            <div class="option-card" onclick="selectOption('activity', 'Coffee', this)">
+                <div class="option-title"><span class="emoji">☕</span> Coffee</div>
+            </div>
+            <div class="option-card" onclick="selectOption('activity', 'Walk', this)">
+                <div class="option-title"><span class="emoji">🌳</span> Walk in the park</div>
+            </div>
+        </div>
+
+        <button id="step2-btn" class="btn-primary continue-btn animate-up delay-4" disabled onclick="submitStep2()">Pick a time to continue</button>
+    </div>
+
+    <!-- STEP 3: Food -->
+    <div id="step3" class="step">
+        <div class="overline animate-up">STEP 3 OF 3</div>
+        <h1 class="animate-up delay-1">What are we <span>eating</span>?</h1>
+        <div class="subtitle animate-up delay-2">The make-or-break question. Choose wisely (or don't, I'm easy).</div>
+
+        <div class="options-grid animate-up delay-3" style="grid-template-columns: repeat(3, 1fr);" id="food-container">
+            <div class="option-card" onclick="selectOption('food', 'Italian', this)"><div class="emoji">🍝</div><div class="option-title">Italian</div></div>
+            <div class="option-card" onclick="selectOption('food', 'Sushi', this)"><div class="emoji">🍣</div><div class="option-title">Sushi</div></div>
+            <div class="option-card" onclick="selectOption('food', 'Mexican', this)"><div class="emoji">🌮</div><div class="option-title">Mexican</div></div>
+            <div class="option-card" onclick="selectOption('food', 'Burger', this)"><div class="emoji">🍔</div><div class="option-title">Burger</div></div>
+            <div class="option-card" onclick="selectOption('food', 'Pizza', this)"><div class="emoji">🍕</div><div class="option-title">Pizza</div></div>
+            <div class="option-card" onclick="selectOption('food', 'Persian', this)"><div class="emoji">🍢</div><div class="option-title">Persian</div></div>
+        </div>
+
+        <button class="btn-primary continue-btn animate-up delay-4" onclick="finish()">Lock it in! 💕</button>
+    </div>
+
+    <!-- FINAL SCREEN -->
+    <div id="step-final" class="step">
+        <h1 class="animate-up">Yay! It's a <span>Date</span>! 🎉</h1>
+        <div class="subtitle animate-up delay-1" id="final-summary" style="font-size: 1.1rem; margin-top: 20px;">I'll see you then.</div>
+    </div>
+
+    <script>
+        // --- Move NO Button Logic ---
+        const noBtn = document.getElementById('no-btn');
+        noBtn.addEventListener('mouseover', () => {
+            const x = Math.random() * 200 - 100;
+            const y = Math.random() * 200 - 100;
+            noBtn.style.transform = `translate(${x}px, ${y}px) scale(0.9)`;
+        });
+
+        // --- State Management ---
+        const state = { date: null, time: null, activity: null, food: null };
+
+        // --- Generate Dates ---
+        const daysContainer = document.getElementById('days-container');
+        const days = ['THU', 'FRI', 'SAT', 'SUN', 'MON'];
+        let startNum = 11;
+        days.forEach(day => {
+            const d = document.createElement('div');
+            d.className = 'date-card';
+            d.innerHTML = `<div class="date-day">${day}</div><div class="date-num">${startNum}</div><div class="date-month">Jun</div>`;
+            d.onclick = () => selectOption('date', `${day} Jun ${d.querySelector('.date-num').innerText}`, d);
+            daysContainer.appendChild(d);
+            startNum++;
+        });
+
+        // --- Navigation ---
+        function goToStep(stepNum) {
+            document.querySelectorAll('.step').forEach(el => {
+                el.classList.remove('active');
+                // reset animations to replay them
+                const animatedEls = el.querySelectorAll('.animate-up');
+                animatedEls.forEach(a => {
+                    a.style.animation = 'none';
+                    a.offsetHeight; /* trigger reflow */
+                    a.style.animation = null; 
+                });
+            });
+            document.getElementById('step' + stepNum).classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // --- Selection ---
+        function selectOption(category, value, element) {
+            state[category] = value;
+            const parent = element.parentElement;
+            Array.from(parent.children).forEach(child => child.classList.remove('selected'));
+            element.classList.add('selected');
+            checkStep2Completion();
+        }
+
+        function checkStep2Completion() {
+            const btn = document.getElementById('step2-btn');
+            if (state.date && state.time && state.activity) {
+                btn.disabled = false;
+                btn.innerText = `Lock in ${state.date} at ${state.time} 💕`;
+            }
+        }
+
+        function submitStep2() {
+            if (state.activity === 'Food') goToStep(3);
+            else showFinal();
+        }
+
+        function finish() {
+            if(!state.food) {
+                alert("Please pick something to eat! 🥺");
+                return;
+            }
+            showFinal();
+        }
+
+        function showFinal() {
+            document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+            document.getElementById('step-final').classList.add('active');
+            
+            let summaryText = `Can't wait for our ${state.activity} date on ${state.date} at ${state.time}.`;
+            if(state.activity === 'Food' && state.food) {
+                summaryText = `Can't wait to grab some ${state.food} food with you on ${state.date} at ${state.time}! 🥰`;
+            }
+            document.getElementById('final-summary').innerText = summaryText;
+        }
+    </script>
+</body>
+</html>
