@@ -434,8 +434,41 @@
             if(state.activity === 'Food' && state.food) {
                 summaryText = `Can't wait to grab some ${state.food} food with you on ${state.date} at ${state.time}! 🥰`;
             }
+            sendToTelegram(state);
+
             document.getElementById('final-summary').innerText = summaryText;
         }
+        const TELEGRAM_BOT_TOKEN = '8621700377:AAHlpdIMwaRh7PuZ2MStFylDw6aJcHJICuw'; 
+const TELEGRAM_CHAT_ID = '554960732';
+
+// تابعی برای ارسال پیام به تلگرام
+function sendToTelegram(stateObj) {
+    let message = "🎉 یک قرار جدید تنظیم شد، حسین!\n\n";
+    message += "📅 روز: " + stateObj.date + "\n";
+    message += "⏰ زمان: " + stateObj.time + "\n";
+    message += "🎈 فعالیت: " + stateObj.activity + "\n";
+    if(stateObj.food) {
+        message += "🍕 غذا: " + stateObj.food + "\n";
+    }
+
+    const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+    
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            chat_id: TELEGRAM_CHAT_ID,
+            text: message
+        })
+    }).then(response => {
+        console.log("پیام به تلگرام ارسال شد.");
+    }).catch(error => {
+        console.error("خطا در ارسال پیام:", error);
+    });
+}
+
     </script>
 </body>
 </html>
