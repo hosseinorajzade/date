@@ -1,0 +1,195 @@
+{
+  "family": "ml_gbm",
+  "params": {
+    "delta": 0.03,
+    "horizon": 24,
+    "k_atr": 3.0
+  },
+  "holdout": {
+    "start": "2024-07-01",
+    "end": "2026-09-28",
+    "years": 2.245,
+    "net_return": 0.3856582291790407,
+    "cagr": 0.1563801951432766,
+    "sharpe": 0.7903229605799706,
+    "sortino": 1.2710685510271629,
+    "max_drawdown": 0.15990720662871438,
+    "ann_vol": 0.2117140322527854,
+    "n_trades": 400,
+    "calmar": 0.9779433862938581,
+    "profit_factor": 1.146104615284402,
+    "win_rate": 0.4,
+    "avg_r": 0.09605870904811802,
+    "avg_bars_held": 31.4225,
+    "fees_paid_pct": 0.19640724343647262,
+    "funding_paid_pct": -0.004829884900641627,
+    "stop_exits": 185,
+    "kill_events": 1,
+    "daily_halts": 4
+  },
+  "stressed": {
+    "start": "2024-07-01",
+    "end": "2026-09-28",
+    "years": 2.245,
+    "net_return": 0.20892830734978052,
+    "cagr": 0.08819137508640029,
+    "sharpe": 0.5019408635411763,
+    "sortino": 0.7935619912800104,
+    "max_drawdown": 0.17152303718410666,
+    "ann_vol": 0.213115851256735,
+    "n_trades": 400,
+    "calmar": 0.5141663565095272,
+    "profit_factor": 1.0813177910695648,
+    "win_rate": 0.3975,
+    "avg_r": 0.06200989762174926,
+    "avg_bars_held": 31.2625,
+    "fees_paid_pct": 0.2760917228853802,
+    "funding_paid_pct": -0.004079563561199302,
+    "stop_exits": 188,
+    "kill_events": 1,
+    "daily_halts": 4
+  },
+  "dsr": {
+    "dsr": 0.5728135767701266,
+    "dsr_strict": 0.00011146735670506075,
+    "n_effective": 8.469323816502126,
+    "n_raw": 80,
+    "sr0_ann": 0.6693933103926513,
+    "sr0_ann_strict": 3.2225299952983306,
+    "psr_vs_zero": 0.8848368414063146,
+    "skew": 0.6923369785180784,
+    "kurtosis": 7.314061978567324,
+    "n_obs": 820
+  },
+  "monte_carlo": {
+    "n_trades": 400,
+    "p_profit": 0.8274,
+    "final_return_p05": -0.1931815035671831,
+    "final_return_p50": 0.3786826339803827,
+    "final_return_p95": 1.4438618554883087,
+    "mdd_p50": 0.22121579152626314,
+    "mdd_p95": 0.3859751174389222,
+    "mdd_p99": 0.4634628631360596,
+    "p_mdd_gt_20": 0.62
+  },
+  "bootstrap": {
+    "sharpe_p05": -0.2666776717849545,
+    "sharpe_p50": 0.779498864965052,
+    "sharpe_p95": 1.8357122362751876,
+    "p_sharpe_gt_0": 0.893
+  },
+  "placebo": {
+    "actual_sharpe": 0.7903229605799706,
+    "placebo_mean": -0.2451813386618398,
+    "placebo_p95": 0.995471883598029,
+    "placebo_std": 0.7745755831442928,
+    "p_value": 0.07462686567164178,
+    "n_shifts": 200
+  },
+  "windows_positive_share": 0.7,
+  "n_windows": 10,
+  "cross_asset_holdout": {
+    "ETH/USDT:USDT": {
+      "net_return": 0.5770481141453934,
+      "sharpe": 1.0592673444495813,
+      "max_drawdown": 0.20274845297135136,
+      "n_trades": 377,
+      "profit_factor": 1.2359554763856588
+    },
+    "BNB/USDT:USDT": {
+      "net_return": 0.17650695175624254,
+      "sharpe": 0.4614054067996196,
+      "max_drawdown": 0.23119462465389284,
+      "n_trades": 421,
+      "profit_factor": 1.07385881133846
+    },
+    "XRP/USDT:USDT": {
+      "net_return": 0.6580991590902168,
+      "sharpe": 1.2219691815003986,
+      "max_drawdown": 0.23409541446599125,
+      "n_trades": 297,
+      "profit_factor": 1.2454105039671775
+    },
+    "LTC/USDT:USDT": {
+      "net_return": 0.7896653012072576,
+      "sharpe": 1.3548816728407036,
+      "max_drawdown": 0.19009675116456282,
+      "n_trades": 339,
+      "profit_factor": 1.3170300301967364
+    },
+    "ADA/USDT:USDT": {
+      "net_return": 0.09105612251262252,
+      "sharpe": 0.2960872083248515,
+      "max_drawdown": 0.20287905035649578,
+      "n_trades": 345,
+      "profit_factor": 1.0472519252209442
+    }
+  },
+  "buy_and_hold_return": -0.9767955674991047,
+  "acceptance": [
+    {
+      "criterion": "net return > 0",
+      "value": 0.3856582291790407,
+      "threshold": "> 0",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "criterion": "Sharpe",
+      "value": 0.7903229605799706,
+      "threshold": ">= 1.0",
+      "pass": false,
+      "detail": ""
+    },
+    {
+      "criterion": "Sortino",
+      "value": 1.2710685510271629,
+      "threshold": ">= 1.5",
+      "pass": false,
+      "detail": ""
+    },
+    {
+      "criterion": "Max drawdown",
+      "value": 0.15990720662871438,
+      "threshold": "<= 0.2",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "criterion": "Profit factor",
+      "value": 1.146104615284402,
+      "threshold": ">= 1.3",
+      "pass": false,
+      "detail": ""
+    },
+    {
+      "criterion": "Trade count",
+      "value": 400,
+      "threshold": ">= 200",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "criterion": "Positive 90d windows",
+      "value": 0.7,
+      "threshold": "> 0.5",
+      "pass": true,
+      "detail": "10 windows"
+    },
+    {
+      "criterion": "Robust to 1.5x fees+slippage",
+      "value": 0.5019408635411763,
+      "threshold": "Sharpe/Sortino/MDD/PF/net all still pass",
+      "pass": false,
+      "detail": "stressed: net=0.209 sharpe=0.50 sortino=0.79 mdd=0.172 pf=1.08"
+    },
+    {
+      "criterion": "Deflated Sharpe",
+      "value": 0.5728135767701266,
+      "threshold": ">= 0.95",
+      "pass": false,
+      "detail": "N_eff=8.5 (raw 80), SR0=0.67/yr; strict-variance DSR=0.000 (SR0=3.22/yr)"
+    }
+  ],
+  "accepted": false
+}

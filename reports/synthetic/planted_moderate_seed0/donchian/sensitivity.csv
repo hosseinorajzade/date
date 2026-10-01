@@ -1,0 +1,6 @@
+role,params,sharpe,ret,n_trades
+chosen,"{'allow_short': True, 'k_atr': 4.0, 'n': 48}",5.153900145686172,104.92105030890487,446
+neighbour,"{'allow_short': True, 'k_atr': 4.0, 'n': 24}",4.862476920960959,78.95319770928427,891
+neighbour,"{'allow_short': True, 'k_atr': 4.0, 'n': 96}",4.679052846991973,55.905668617216875,238
+neighbour,"{'allow_short': True, 'k_atr': 3.0, 'n': 48}",5.090631339915756,287.9250003418291,445
+neighbour,"{'allow_short': False, 'k_atr': 4.0, 'n': 48}",3.430500760634323,10.33069063685543,225

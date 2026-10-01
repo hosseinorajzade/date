@@ -1,0 +1,18 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+data/raw/
+data/clean/
+paper_state/
+*.egg-info/
+.numba_cache/
+# bulky derived artefacts from synthetic validation runs (regenerable). Per-run top-level files (summary.json,
+# trials.jsonl, journal.md) are kept for every run; full per-family detail only for 3 representative runs.
+logs_tmp/
+reports/synthetic/**/*.parquet
+reports/synthetic/**/holdout_trades.csv
+reports/synthetic/*/*/
+!reports/synthetic/null_seed0/*/
+!reports/synthetic/planted_weak_seed0/*/
+!reports/synthetic/planted_moderate_seed0/*/

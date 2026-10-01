@@ -1,0 +1,147 @@
+{
+  "label": "synthetic-null-seed4",
+  "n_trials": {
+    "n_trials_raw": 80,
+    "n_trials_effective": 9.072860372269496,
+    "trial_sr_var_daily": 0.0006895487445813964,
+    "trial_sr_var_null": 0.0005767012687427913,
+    "n_days_research": 1735,
+    "by_family": {
+      "donchian": 24,
+      "meanrev": 36,
+      "squeeze": 12,
+      "ml_gbm": 8
+    }
+  },
+  "results": {
+    "donchian": {
+      "family": "donchian",
+      "params": {
+        "allow_short": false,
+        "k_atr": 2.0,
+        "n": 192
+      },
+      "accepted": false,
+      "stage": "rejected_at_research",
+      "gates": {
+        "wfo_sharpe": [
+          -0.5116820365301108,
+          0.8,
+          false
+        ],
+        "wfo_positive_windows": [
+          0.4,
+          0.5,
+          false
+        ],
+        "research_trades": [
+          101.0,
+          100,
+          true
+        ],
+        "sensitivity_neighbours_positive": [
+          0.6666666666666666,
+          0.6,
+          true
+        ]
+      }
+    },
+    "meanrev": {
+      "family": "meanrev",
+      "params": {
+        "er_max": 1.01,
+        "k_atr": 3.0,
+        "lookback": 96,
+        "z_in": 2.0
+      },
+      "accepted": false,
+      "stage": "rejected_at_research",
+      "gates": {
+        "wfo_sharpe": [
+          0.294119666744203,
+          0.8,
+          false
+        ],
+        "wfo_positive_windows": [
+          0.5333333333333333,
+          0.5,
+          true
+        ],
+        "research_trades": [
+          439.0,
+          100,
+          true
+        ],
+        "sensitivity_neighbours_positive": [
+          0.75,
+          0.6,
+          true
+        ]
+      }
+    },
+    "squeeze": {
+      "family": "squeeze",
+      "params": {
+        "k_atr": 4.0,
+        "lookback": 48,
+        "quantile": 0.2
+      },
+      "accepted": false,
+      "stage": "rejected_at_research",
+      "gates": {
+        "wfo_sharpe": [
+          0.18663033544359478,
+          0.8,
+          false
+        ],
+        "wfo_positive_windows": [
+          0.4666666666666667,
+          0.5,
+          false
+        ],
+        "research_trades": [
+          432.0,
+          100,
+          true
+        ],
+        "sensitivity_neighbours_positive": [
+          0.0,
+          0.6,
+          false
+        ]
+      }
+    },
+    "ml_gbm": {
+      "family": "ml_gbm",
+      "params": {
+        "delta": 0.06,
+        "horizon": 24,
+        "k_atr": 2.0
+      },
+      "accepted": false,
+      "stage": "rejected_at_research",
+      "gates": {
+        "wfo_sharpe": [
+          -0.7528407078441891,
+          0.8,
+          false
+        ],
+        "wfo_positive_windows": [
+          0.3333333333333333,
+          0.5,
+          false
+        ],
+        "research_trades": [
+          729.0,
+          100,
+          true
+        ],
+        "sensitivity_neighbours_positive": [
+          0.0,
+          0.6,
+          false
+        ]
+      }
+    }
+  }
+}

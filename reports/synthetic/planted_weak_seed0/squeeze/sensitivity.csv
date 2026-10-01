@@ -1,0 +1,5 @@
+role,params,sharpe,ret,n_trades
+chosen,"{'k_atr': 4.0, 'lookback': 24, 'quantile': 0.1}",0.5079729946447393,0.22612510109046124,565
+neighbour,"{'k_atr': 4.0, 'lookback': 48, 'quantile': 0.1}",0.5092318201535537,0.2214413322529445,323
+neighbour,"{'k_atr': 4.0, 'lookback': 24, 'quantile': 0.2}",0.886407679782888,0.6157417082294636,848
+neighbour,"{'k_atr': 3.0, 'lookback': 24, 'quantile': 0.1}",0.29429517320349413,0.13967406204030675,567

@@ -1,0 +1,44 @@
+[
+  {
+    "family": "donchian",
+    "params": {
+      "allow_short": true,
+      "k_atr": 4.0,
+      "n": 96
+    },
+    "when": "2026-10-01T10:54:09+00:00",
+    "rows": 19680,
+    "first": "2024-07-01 00:00:00+00:00",
+    "last": "2026-09-28 23:00:00+00:00",
+    "data_hash": "d5cf9c347e058a85",
+    "retouch": false
+  },
+  {
+    "family": "squeeze",
+    "params": {
+      "k_atr": 4.0,
+      "lookback": 24,
+      "quantile": 0.1
+    },
+    "when": "2026-10-01T10:54:13+00:00",
+    "rows": 19680,
+    "first": "2024-07-01 00:00:00+00:00",
+    "last": "2026-09-28 23:00:00+00:00",
+    "data_hash": "d5cf9c347e058a85",
+    "retouch": false
+  },
+  {
+    "family": "ml_gbm",
+    "params": {
+      "delta": 0.03,
+      "horizon": 24,
+      "k_atr": 3.0
+    },
+    "when": "2026-10-01T10:54:16+00:00",
+    "rows": 19680,
+    "first": "2024-07-01 00:00:00+00:00",
+    "last": "2026-09-28 23:00:00+00:00",
+    "data_hash": "d5cf9c347e058a85",
+    "retouch": false
+  }
+]

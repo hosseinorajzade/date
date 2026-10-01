@@ -1,0 +1,13 @@
+[project]
+name = "quantbot"
+version = "0.1.0"
+description = "Systematic crypto trading research, backtest and paper-trading framework"
+requires-python = ">=3.11"
+
+[tool.setuptools.packages.find]
+include = ["quantbot*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+markers = ["slow: slower integration tests"]

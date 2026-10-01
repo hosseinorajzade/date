@@ -1,0 +1,87 @@
+# ---------------------------------------------------------------------------
+# PRE-REGISTERED ASSUMPTIONS (written before any market data was inspected).
+# The task prompt left [MARKET]/[TIMEFRAME]/[X]%/[N] as placeholders; these are
+# the defaults chosen. Changing them after seeing results invalidates the run.
+# ---------------------------------------------------------------------------
+market:
+  exchange: binanceusdm          # Binance USDT-M perpetuals (long/short, funding)
+  primary: "BTC/USDT:USDT"       # parameters are selected on this asset ONLY
+  universe:                      # cross-asset generalisation check (params NOT re-fit)
+    - "BTC/USDT:USDT"
+    - "ETH/USDT:USDT"
+    - "BNB/USDT:USDT"
+    - "XRP/USDT:USDT"
+    - "LTC/USDT:USDT"
+    - "ADA/USDT:USDT"
+  timeframe: 1h
+  start: "2019-10-01"
+  end: null                      # null = latest closed bar
+  data_dir: data
+
+# Chronological split. Hold-out = everything after val_end; touched once per family.
+splits:
+  train_end: "2022-12-31"
+  val_end: "2024-06-30"
+
+costs:                           # per side, applied to notional
+  fee_bps: 5.0                   # taker fee (Binance futures VIP0 is 4 bps; padded)
+  slippage_bps: 3.0              # half-spread + impact
+  stop_extra_slippage_bps: 3.0   # stop-market orders fill worse
+  funding_bps_per_8h: 1.0        # fallback if no historical funding series (0.01%/8h)
+  stress_multiplier: 1.5         # acceptance: must survive +50% fees & slippage
+
+risk:
+  risk_per_trade: 0.01           # X = 1% of equity at risk to the stop, per trade
+  max_leverage: 2.0              # max gross notional / equity
+  min_stop_pct: 0.003            # floor on stop distance (caps size on tiny-ATR bars)
+  daily_loss_limit: 0.03         # flatten + no new entries for rest of UTC day
+  kill_switch_drawdown: 0.15     # flatten + halt when equity is 15% below peak
+  kill_cooldown_days: 14         # operator re-arm delay (backtest); live needs manual reset
+
+walkforward:
+  train_days: 365
+  test_days: 90
+  step_days: 90
+
+research_gates:                  # a family only reaches the hold-out if it passes these on research data
+  min_wfo_sharpe: 0.8
+  min_positive_windows: 0.5
+  min_trades: 100
+  min_sensitivity_positive: 0.6  # share of neighbouring params with Sharpe > 0
+
+acceptance:                      # ALL must hold on the hold-out, after costs
+  min_sharpe: 1.0
+  min_sortino: 1.5
+  max_drawdown: 0.20
+  min_profit_factor: 1.3
+  min_trades: 200
+  min_positive_window_share: 0.5 # strictly more than this share of 90-day windows positive
+  window_days: 90
+  min_dsr: 0.95
+  stress_multiplier: 1.5
+
+monte_carlo:
+  n_paths: 5000
+  seed: 12345
+
+paper:
+  min_weeks: 4                   # N weeks of paper trading before live is permitted
+  state_dir: paper_state
+  poll_seconds: 20
+  strategy: null                 # set to chosen family + params after a passing hold-out
+  params: {}
+
+telegram:
+  enabled: false                 # token/chat id come from env (.env), never from this file
+
+paper_gate:                      # what "successful paper trading" means before live is permitted
+  min_trades: 20
+  min_bar_coverage: 0.95         # share of expected bars actually processed (uptime)
+  max_drawdown: 0.20
+  min_net_return: 0.0
+  max_unreconciled_errors: 0
+
+live:
+  enabled: false                 # live trading also requires: paper gate passed AND env LIVE_TRADING_CONFIRM=YES
+  sandbox: true                  # exchange testnet; set false only after a successful testnet run
+  max_position_mismatch_pct: 2.0 # abort if exchange position differs from the bot's belief by more than this
