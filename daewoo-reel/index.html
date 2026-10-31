@@ -520,7 +520,7 @@ function buildPromise(cfg, i){
 
   // title + detail
   const title = makeText(host, cfg.title, { y: Ly.titleY, cls: 'title', h: 110 });
-  const detail = makeText(host, cfg.detail, { y: Ly.detailY, cls: 'detail', h: 120, wrap: true });
+  const detail = makeText(host, cfg.detail, { y: Ly.detailY, cls: 'detail', h: 90 });
   wordsIn(tl, title.words, s0 + PT.title, { stagger: 0.06 });
   wordsIn(tl, detail.words, s0 + PT.detail, { stagger: 0.045, dur: 0.5 });
 
