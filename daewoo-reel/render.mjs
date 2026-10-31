@@ -3,6 +3,7 @@
 //   node render.mjs                         full render → out/daewoo-8-promises.mp4
 //   node render.mjs --stills 0,1.5,12,64    PNG stills → out/stills/
 //   node render.mjs --from 7 --to 14        partial render (preview)
+//   node render.mjs --audio-only            rebuild the soundtrack and remux it into the existing MP4
 //   options: --workers 4  --crf 17  --out path.mp4
 //
 // Every frame is produced with tl.seek(frame / fps), so output is deterministic.
@@ -23,6 +24,7 @@ const WORKERS = +arg('workers', 4);
 const CRF = arg('crf', '17');
 const OUT = path.resolve(ROOT, arg('out', 'out/daewoo-8-promises.mp4'));
 const STILLS = arg('stills', null);
+const AUDIO_ONLY = argv.includes('--audio-only');
 const CHROME = process.env.CHROME_PATH ||
   ['/opt/pw-browsers/chromium-1243/chrome-linux64/chrome', '/usr/bin/chromium', '/usr/bin/google-chrome']
     .find(p => fs.existsSync(p));
@@ -68,6 +70,27 @@ const launch = () => puppeteer.launch({
 });
 const browser = await launch();
 const duration = await (async () => { const p = await openPage(browser); const d = await p.evaluate('CONFIG.duration'); await p.close(); return d; })();
+const run = (cmd, args) => new Promise((res, rej) => spawn(cmd, args, { stdio: 'inherit' }).on('close', c => c === 0 ? res() : rej(new Error(cmd + ' ' + c))));
+// Soundtrack: cue sheet from the page (CONFIG) → audio.py → loudness-normalized AAC muxed with the video.
+async function buildAudio() {
+  const p = await openPage(browser);
+  const cues = await p.evaluate('window.audioCues()'); await p.close();
+  const dir = path.join(ROOT, 'out/.audio'); fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.join(dir, 'cues.json'), JSON.stringify(cues, null, 2));
+  await run('python3', [path.join(ROOT, 'audio.py'), path.join(dir, 'cues.json'), path.join(dir, 'audio.wav')]);
+  return path.join(dir, 'audio.wav');
+}
+async function mux(videoIn, wav, out) {
+  await run('ffmpeg', ['-y', '-loglevel', 'error', '-i', videoIn, '-i', wav, '-map', '0:v', '-map', '1:a', '-c:v', 'copy',
+    '-af', 'loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000', '-c:a', 'aac', '-b:a', '192k', '-shortest', '-movflags', '+faststart', out]);
+}
+if (AUDIO_ONLY) {
+  const wav = await buildAudio(); await browser.close(); server.close();
+  const tmpOut = OUT.replace(/\.mp4$/, '.tmp.mp4');
+  await mux(OUT, wav, tmpOut); fs.renameSync(tmpOut, OUT);
+  fs.rmSync(path.join(ROOT, 'out/.audio'), { recursive: true, force: true });
+  console.log('✔ soundtrack muxed into', path.relative(process.cwd(), OUT)); process.exit(0);
+}
 const shot = (page, t) => page.evaluate(t => window.renderAt(t), t).then(() => page.screenshot({ type: 'png', clip: { x: 0, y: 0, width: 1080, height: 1920 }, captureBeyondViewport: false }));
 
 if (STILLS) {
@@ -110,14 +133,15 @@ await Promise.all(Array.from({ length: WORKERS }, async (_, w) => {
   }
   ff.stdin.end(); await closed; await wb.close();
 }));
-await browser.close(); server.close();
 
-// concat segments + silent stereo track (Instagram-friendly), faststart
+// concat segments, then add the soundtrack
+const wav = await buildAudio();
+await browser.close(); server.close();
 const list = path.join(tmp, 'list.txt');
 fs.writeFileSync(list, segs.filter(Boolean).map(f => `file '${f}'`).join('\n'));
-await new Promise((res, rej) => spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'concat', '-safe', '0', '-i', list,
-  '-f', 'lavfi', '-i', 'anullsrc=channel_layout=stereo:sample_rate=48000',
-  '-map', '0:v', '-map', '1:a', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '128k', '-shortest', '-movflags', '+faststart', OUT],
-  { stdio: 'inherit' }).on('close', c => c === 0 ? res() : rej(new Error('concat ' + c))));
+const silent = path.join(tmp, 'video.mp4');
+await run('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'concat', '-safe', '0', '-i', list, '-c', 'copy', silent]);
+await mux(silent, wav, OUT);
+fs.rmSync(path.join(ROOT, 'out/.audio'), { recursive: true, force: true });
 fs.rmSync(tmp, { recursive: true, force: true });
 console.log(`✔ ${path.relative(process.cwd(), OUT)}  (${((Date.now() - t0) / 1000).toFixed(0)}s)`);

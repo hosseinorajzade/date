@@ -644,6 +644,22 @@ function seekTo(t){ tl.seek(Math.max(0, Math.min(CONFIG.duration, t)), true); re
 window.seekTo = seekTo;
 window.renderAt = t => { seekTo(t); return tl.time(); };
 
+/* Sound-design cue sheet, derived from CONFIG so audio stays frame-synced with the picture. */
+window.audioCues = () => {
+  const T = CONFIG.t, PT = CONFIG.p, F = T.finale, FT = CONFIG.finale.t;
+  return {
+    duration: CONFIG.duration, seed: CONFIG.seed,
+    hook: T.draw, question: T.q2, title: T.title, fly: T.fly, promiseStart: T.promiseStart, promiseDur: T.promiseDur,
+    promises: CONFIG.promises.map((p, i) => {
+      const s0 = T.promiseStart + i*T.promiseDur;
+      return { start: s0, counter: !p.hero.word, heroIn: s0 + PT.hero, countDur: PT.count,
+               fill: s0 + PT.fill + 0.55, exit: s0 + PT.out };
+    }),
+    finale: { start: F, explode: F + FT.explode, lock: F + FT.fly + FT.flyDur, walls: F + FT.walls,
+              title: F + FT.title, logo: F + FT.logo }
+  };
+};
+
 function fitStage(){
   const st = $('#stage');
   if (RENDER){ st.style.transform = 'none'; return; }
