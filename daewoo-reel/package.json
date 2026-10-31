@@ -1,0 +1,20 @@
+{
+  "name": "daewoo-reel",
+  "version": "1.0.0",
+  "description": "Daewoo 8 promises Instagram reel (GSAP → MP4)",
+  "scripts": {
+    "render": "node render.mjs",
+    "stills": "node render.mjs --stills 2,6,10,64",
+    "preview": "npx serve ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@fontsource/vazirmatn": "^5.3.0",
+    "gsap": "3.12.5",
+    "puppeteer-core": "^24.43.1"
+  },
+  "private": true,
+  "type": "module"
+}
