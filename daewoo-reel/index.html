@@ -77,7 +77,7 @@
     <div class="layer" id="texts"></div>
     <svg class="full layer" id="logoSvg" viewBox="0 0 1080 1920">
       <!-- PLACEHOLDER: replace the contents of #logo with the official Daewoo SVG logo -->
-      <g id="logo"><text x="540" y="1452" text-anchor="middle" fill="#FFFFFF"
+      <g id="logo"><text x="540" y="1372" text-anchor="middle" fill="#FFFFFF"
         style="font-family:Vazirmatn,sans-serif;font-weight:800;font-size:62px;letter-spacing:14px;direction:ltr">DAEWOO</text></g>
     </svg>
     <div class="layer" id="vignette"></div>
@@ -99,7 +99,7 @@
    ===================================================================== */
 const CONFIG = {
   fps: 30,
-  duration: 68.5,
+  duration: 45.0,
   seed: 8008,
   colors: {
     red: '#ED1C24', black: '#0B0B0C', white: '#FFFFFF',
@@ -109,12 +109,14 @@ const CONFIG = {
   // Stage layout (px, 1080×1920). Content is centered on the screen (cx 540) and kept inside x 180–900, clear of the Reel buttons on the right.
   layout: { cx: 540, textW: 720, ordY: 418, artY: 680, heroY: 1040, titleY: 1236, detailY: 1352, heroMaxW: 700 },
 
-  // The ۸ ("roof"). Local units; segments: 4 on the right leg (foot→apex), 4 on the left (apex→foot).
+  // The 8: a figure-eight drawn as one continuous stroke, cut into 8 equal segments (one per promise).
+  // In the finale it gathers, rotates 90° and becomes ∞.
   eight: {
-    halfW: 110, apexY: -150, footY: 150, bulge: 10, stroke: 30, gap: 1.6, explode: 26,
-    intro:    { x: 540, y: 760,  s: 2.0  },
-    progress: { x: 540, y: 318,  s: 0.32 },
-    roof:     { x: 540, y: 570,  s: 2.1, halfW: 150, apexY: -60, stroke: 19 }
+    H: 150, width: 190, topK: 0.84, stroke: 30, gap: 1.4, phase: 6.25, explode: 30,
+    outline: '#545455',                       // = white 30% over black, opaque (no double alpha at the crossing)
+    intro:    { x: 540, y: 760, s: 2.0  },
+    progress: { x: 540, y: 318, s: 0.30 },
+    final:    { x: 540, y: 520, s: 1.9, rot: 90, k: 1, width: 165, stroke: 18 }
   },
 
   intro: {
@@ -125,17 +127,19 @@ const CONFIG = {
     y: { q1: 1236, q2: 1336, title: 1250, values: 1366 }
   },
 
-  // Master timing (seconds)
+  // Master timing (seconds). 120 BPM grid: beat 0.5s, bar 2s; each promise = 2 bars.
+  bpm: 120,
   t: {
-    draw: 0.0, drawDur: 1.05, settle: 0.95,
-    q1: 0.62, q2: 0.95, qOut: 3.7,
-    title: 3.95, values: 4.45, introOut: 6.9,
-    fly: 6.95, flyDur: 1.0,
-    promiseStart: 7.6, promiseDur: 6.4,
-    finale: 58.8
+    draw: 0.0, drawDur: 0.75,
+    q1: 0.4, q2: 0.6, qOut: 2.75,
+    title: 2.9, values: 3.3, introOut: 5.3,
+    fly: 5.3, flyDur: 0.7,
+    promiseStart: 6.0, promiseDur: 4.0,
+    finale: 38.0
   },
-  // Per-promise local timing (seconds from the promise start)
-  p: { ord: 0.0, art: 0.1, hero: 0.35, count: 1.3, fill: 1.55, title: 0.8, detail: 1.3, out: 5.7 },
+  // Per-promise local timing (seconds from the promise start). The segment completes on beat 3 (1.0s).
+  p: { ord: 0.0, art: 0.0, hero: 0.1, count: 0.75, fill: 0.55, fillDur: 0.45, title: 0.3, detail: 0.55, out: 3.55 },
+  motion: { art: 1.55 },                       // line-art animations play this much faster
 
   // ⚠ Placeholder copy — replace with the official list of commitments.
   promises: [
@@ -158,12 +162,12 @@ const CONFIG = {
   ],
 
   finale: {
-    title: '*۸* پیمان، یک سقف آرامش',   // *…* = red
+    title: 'پیمانی بی‌پایان',
     values: ['تعهد', 'احترام', 'آرامش'],
     group: 'گروه صنعتی انتخاب',
-    y: { title: 1236, values: 1334, group: 1508 },
-    // local timing from CONFIG.t.finale
-    t: { explode: 0.0, fly: 0.15, flyDur: 1.7, walls: 1.5, items: 2.0, title: 3.1, values: 3.9, logo: 4.9 }
+    y: { title: 1150, values: 1246, group: 1432 },
+    // local timing from CONFIG.t.finale (beats: lock on 1.0, ∞ lands on 2.0)
+    t: { explode: 0.0, fly: 0.1, flyDur: 0.9, rot: 1.0, rotDur: 1.0, items: 2.0, title: 2.35, values: 2.85, logo: 3.4 }
   },
 
   grain: { fps: 15, tile: 256 }
@@ -199,11 +203,11 @@ function makeText(parent, text, { y, cls = '', h = 140, wrap = false }){
 
 /* Motion grammar: things enter from the right and leave toward the left. */
 const HIDE_R = 'inset(0% 0% 0% 100%)', SHOW = 'inset(0% 0% 0% 0%)', HIDE_L = 'inset(0% 100% 0% 0%)';
-function wordsIn(tl, words, at, { stagger = 0.085, dur = 0.75 } = {}){
+function wordsIn(tl, words, at, { stagger = 0.06, dur = 0.55 } = {}){
   tl.fromTo(words, { clipPath: HIDE_R, x: 26, filter: 'blur(8px)', opacity: 0 },
     { clipPath: SHOW, x: 0, filter: 'blur(0px)', opacity: 1, duration: dur, stagger, ease: 'power3.out', immediateRender: true }, at);
 }
-function wordsOut(tl, words, at, { stagger = 0.05, dur = 0.5 } = {}){
+function wordsOut(tl, words, at, { stagger = 0.035, dur = 0.35 } = {}){
   tl.fromTo(words, { clipPath: SHOW, x: 0, filter: 'blur(0px)', opacity: 1 },
     { clipPath: HIDE_L, x: -22, filter: 'blur(6px)', opacity: 0, duration: dur, stagger, ease: 'power2.in', immediateRender: false }, at);
 }
@@ -221,85 +225,66 @@ const DERIVED = [];
 function renderDerived(){ for (const f of DERIVED) f(); }
 
 /* =====================================================================
-   The ۸
+   The 8  (→ ∞)
    ===================================================================== */
 const E = CONFIG.eight;
-const eightP = { x: E.intro.x, y: E.intro.y, s: E.intro.s, hw: E.halfW, ay: E.apexY, sw: E.stroke, ex: 0, pulse: 1 };
-function legs(hw, ay, fy, bulge){
-  // right leg: foot → apex ; left leg: apex → foot (RTL reading order)
-  const dx = -hw, dy = ay - fy, len = Math.hypot(dx, dy), nx = -dy/len, ny = dx/len;
-  const cx = hw/2 + nx*bulge, cy = (ay+fy)/2 + ny*bulge;
-  const f = v => v.toFixed(2);
-  return {
-    R: `M ${f(hw)} ${f(fy)} Q ${f(cx)} ${f(cy)} 0 ${f(ay)}`,
-    L: `M 0 ${f(ay)} Q ${f(-cx)} ${f(cy)} ${f(-hw)} ${f(fy)}`
-  };
+const eightP = { x: E.intro.x, y: E.intro.y, s: E.intro.s, rot: 0, k: E.topK, w: E.width, sw: E.stroke, ex: 0, pulse: 1 };
+// Typographic figure-eight: two round lobes (cubic Béziers) crossing at the center at 45°.
+// Drawn as one stroke from the top, heading left (like handwriting); w = width, H = height of the bottom lobe ×2, k = top-lobe scale.
+function eightPath(w, H, k){
+  const f = v => v.toFixed(2), K = 0.5523, a = Math.PI / 4;
+  const lobe = (rx, ry, sgn) => ({ rx, ry, sgn });          // sgn -1 = top lobe, +1 = bottom lobe
+  const T = lobe(w/2*k, H/2*k, -1), B = lobe(w/2, H/2, 1);
+  const off = (B.ry - T.ry);                                 // vertical centering
+  const P = (x, y) => `${f(x)} ${f(y - off)}`;
+  const hc = 0.62;                                           // handle length at the crossing (× ry)
+  const ca = Math.cos(a), sa = Math.sin(a);
+  let d = `M ${P(0, -2*T.ry)}`;
+  // top lobe: top → left → center (leaving down-right)
+  d += ` C ${P(-K*T.rx, -2*T.ry)} ${P(-T.rx, -T.ry - K*T.ry)} ${P(-T.rx, -T.ry)}`;
+  d += ` C ${P(-T.rx, -T.ry + K*T.ry)} ${P(-hc*T.ry*ca, -hc*T.ry*sa)} ${P(0, 0)}`;
+  // bottom lobe: center → right → bottom → left → center (leaving up-right)
+  d += ` C ${P(hc*B.ry*ca, hc*B.ry*sa)} ${P(B.rx, B.ry - K*B.ry)} ${P(B.rx, B.ry)}`;
+  d += ` C ${P(B.rx, B.ry + K*B.ry)} ${P(K*B.rx, 2*B.ry)} ${P(0, 2*B.ry)}`;
+  d += ` C ${P(-K*B.rx, 2*B.ry)} ${P(-B.rx, B.ry + K*B.ry)} ${P(-B.rx, B.ry)}`;
+  d += ` C ${P(-B.rx, B.ry - K*B.ry)} ${P(-hc*B.ry*ca, hc*B.ry*sa)} ${P(0, 0)}`;
+  // top lobe again: center → right → top
+  d += ` C ${P(hc*T.ry*ca, -hc*T.ry*sa)} ${P(T.rx, -T.ry + K*T.ry)} ${P(T.rx, -T.ry)}`;
+  d += ` C ${P(T.rx, -T.ry - K*T.ry)} ${P(K*T.rx, -2*T.ry)} ${P(0, -2*T.ry)}`;
+  return d;
 }
 const SEGS = [];   // k = 0..7 → promise k+1
-function apexCap(hw, ay, sw, bulge){
-  // Miter "keystone" that fills the notch between the two butt ends at the apex → a pointed roof ridge.
-  const fy = E.footY, dx = -hw, dy = ay - fy, len = Math.hypot(dx, dy), nx = -dy/len, ny = dx/len;
-  const cx = hw/2 + nx*bulge, cy = (ay+fy)/2 + ny*bulge;
-  let tx = 0 - cx, ty = ay - cy; const tl_ = Math.hypot(tx, ty); tx /= tl_; ty /= tl_;   // tangent at apex (right leg)
-  const px = -ty, py = tx;                                                                 // its normal
-  const a = [0, ay], e1 = [px*sw/2, ay + py*sw/2], e2 = [-px*sw/2, ay - py*sw/2];
-  const tip = e1[1] < e2[1] ? e1 : e2;                                                     // outer prong tip
-  const u = -tip[0] / tx, peak = [0, tip[1] + u*ty];
-  const f = v => v.toFixed(2);
-  return {
-    R: `M ${f(a[0])} ${f(a[1])} L ${f(tip[0])} ${f(tip[1])} L 0 ${f(peak[1])} Z`,
-    L: `M ${f(a[0])} ${f(a[1])} L ${f(-tip[0])} ${f(tip[1])} L 0 ${f(peak[1])} Z`
-  };
-}
 function buildEight(){
-  const g = $('#eight');
-  const seg = 25;
+  const g = $('#eight'), seg = 12.5, L = seg - E.gap;
+  const probe = el('path', { d: eightPath(E.width, E.H, E.topK) }, g), len = probe.getTotalLength();
   for (let k = 0; k < 8; k++){
-    const leg = k < 4 ? 'R' : 'L', j = k % 4;
-    const atApex = (leg === 'R' && j === 3) || (leg === 'L' && j === 0);
-    // no gap where the two legs meet: the ridge is continuous, closed by the keystone
-    let start = j*seg + E.gap/2, L = seg - E.gap;
-    if (leg === 'R' && j === 3) L = seg - E.gap/2;
-    if (leg === 'L' && j === 0){ start = 0; L = seg - E.gap/2; }
+    const start = E.phase + k*seg + E.gap/2;   // phase keeps both crossings inside segments, away from the gaps
     const sg = el('g', { class: 'seg' }, g);
     const common = { pathLength: 100, fill: 'none', 'stroke-width': E.stroke, 'stroke-linecap': 'butt', 'stroke-dashoffset': -start };
-    const o  = el('path', { ...common, stroke: CONFIG.colors.w30, 'stroke-dasharray': `${L} 1000`, class: 'ol' }, sg);
-    const ri = el('path', { ...common, stroke: CONFIG.colors.red, 'stroke-dasharray': `0 1000`, class: 'ri' }, sg);
-    const rf = el('path', { ...common, stroke: CONFIG.colors.red, 'stroke-dasharray': `0 1000`, class: 'rf' }, sg);
-    let cap = null;
-    if (atApex) cap = {
-      o:  el('path', { fill: CONFIG.colors.w30, class: 'ol' }, sg),
-      ri: el('path', { fill: CONFIG.colors.red, class: 'ri', opacity: 0 }, sg),
-      rf: el('path', { fill: CONFIG.colors.red, opacity: 0 }, sg)
-    };
-    const frac = (j + .5) / 4;
-    const p = leg === 'R' ? [E.halfW*(1-frac), E.footY + (E.apexY-E.footY)*frac]
-                          : [-E.halfW*frac,    E.apexY + (E.footY-E.apexY)*frac];
-    const m = Math.hypot(p[0], p[1]);
-    SEGS.push({ k, leg, g: sg, paths: [o, ri, rf], o, ri, rf, cap, L, dir: [p[0]/m, p[1]/m] });
+    const o  = el('path', { ...common, stroke: E.outline, 'stroke-dasharray': `${L} ${100 - L}`, class: 'ol' }, sg);
+    const ri = el('path', { ...common, stroke: CONFIG.colors.red, 'stroke-dasharray': `0 100`, class: 'ri' }, sg);
+    const rf = el('path', { ...common, stroke: CONFIG.colors.red, 'stroke-dasharray': `0 100`, class: 'rf' }, sg);
+    const m = probe.getPointAtLength(len * (start + L/2) / 100), mm = Math.hypot(m.x, m.y) || 1;
+    SEGS.push({ k, g: sg, paths: [o, ri, rf], o, ri, rf, L, dir: mm < 20 ? [0, -1] : [m.x/mm, m.y/mm] });
   }
+  probe.remove();
   let last = '';
   DERIVED.push(() => {
-    const key = eightP.hw.toFixed(2) + '|' + eightP.ay.toFixed(2) + '|' + eightP.sw.toFixed(2);
+    const key = eightP.w.toFixed(2) + '|' + eightP.k.toFixed(3) + '|' + eightP.sw.toFixed(2);
     if (key !== last){
       last = key;
-      const d = legs(eightP.hw, eightP.ay, E.footY, E.bulge), c = apexCap(eightP.hw, eightP.ay, eightP.sw, E.bulge);
-      SEGS.forEach(s => {
-        s.paths.forEach(p => { p.setAttribute('d', d[s.leg]); p.setAttribute('stroke-width', eightP.sw.toFixed(2)); });
-        if (s.cap) ['o', 'ri', 'rf'].forEach(n => s.cap[n].setAttribute('d', c[s.leg]));
-      });
+      const d = eightPath(eightP.w, E.H, eightP.k);
+      SEGS.forEach(s => s.paths.forEach(p => { p.setAttribute('d', d); p.setAttribute('stroke-width', eightP.sw.toFixed(2)); }));
     }
-    $('#eight').setAttribute('transform', `translate(${eightP.x.toFixed(2)} ${eightP.y.toFixed(2)}) scale(${(eightP.s*eightP.pulse).toFixed(4)})`);
+    $('#eight').setAttribute('transform', `translate(${eightP.x.toFixed(2)} ${eightP.y.toFixed(2)}) rotate(${eightP.rot.toFixed(3)}) scale(${(eightP.s*eightP.pulse).toFixed(4)})`);
     SEGS.forEach(s => s.g.setAttribute('transform', `translate(${(s.dir[0]*eightP.ex).toFixed(2)} ${(s.dir[1]*eightP.ex).toFixed(2)})`));
   });
 }
 
-/* Faint parallax depth layer: a giant ۸ in lifted black. */
+/* Faint parallax depth layer: a giant 8 in lifted black. */
 function buildDepth(){
-  const g = $('#depth');
-  const d = legs(E.halfW, E.apexY, E.footY, E.bulge);
-  const inner = el('g', { transform: 'translate(560 1010) scale(5.4)' }, g);
-  ['R','L'].forEach(k => el('path', { d: d[k], fill: 'none', stroke: CONFIG.colors.lift, 'stroke-width': 30 }, inner));
+  const inner = el('g', { transform: 'translate(560 1000) scale(5.2)' }, $('#depth'));
+  el('path', { d: eightPath(E.width, E.H, E.topK), fill: 'none', stroke: CONFIG.colors.lift, 'stroke-width': 30 }, inner);
 }
 
 /* =====================================================================
@@ -458,34 +443,33 @@ window.tl = tl;
 const counters = [];
 
 function buildIntro(){
-  const T = CONFIG.t, I = CONFIG.intro, txt = $('#texts'), svg = $('#introSvg');
-  // foundation hairline under the big ۸ (foreshadows the house)
-  const base = el('path', { class: 'ln a d', d: 'M 860 1092 H 220' }, svg); prepDraw(svg);
-  // ۸ draws itself — one continuous stroke, right leg up, left leg down
+  const T = CONFIG.t, I = CONFIG.intro, txt = $('#texts');
+  // the 8 draws itself as one continuous red stroke
   const ri = SEGS.map(s => s.ri);
-  tl.fromTo(ri, { attr: { 'stroke-dasharray': '0 1000' } },
-    { attr: { 'stroke-dasharray': `${SEGS[0].L} 1000` }, duration: T.drawDur/8 + 0.02, stagger: T.drawDur/8, ease: 'none', immediateRender: true }, T.draw);
-  tl.fromTo(eightP, { s: E.intro.s * 1.09 }, { s: E.intro.s, duration: 2.2, ease: 'expo.out', immediateRender: true }, T.draw);
-  drawIn(tl, base, T.settle, { dur: 1.3, ease: 'power3.out' });
-  const caps = SEGS.filter(s => s.cap);
-  tl.fromTo(caps.map(s => s.cap.ri), { opacity: 0 }, { opacity: 1, duration: 0.04, immediateRender: true }, T.draw + T.drawDur*4/8);
-  tl.fromTo($$('#eight .ol'), { opacity: 0 }, { opacity: 1, duration: 0.6, immediateRender: true }, T.fly + 0.3);
+  tl.fromTo(ri, { attr: { 'stroke-dasharray': '0 100' } },
+    { attr: { 'stroke-dasharray': `${SEGS[0].L} ${100 - SEGS[0].L}` }, duration: T.drawDur/8 + 0.02, stagger: T.drawDur/8, ease: 'none', immediateRender: true }, T.draw);
+  tl.fromTo(eightP, { s: E.intro.s * 1.12 }, { s: E.intro.s, duration: 1.4, ease: 'expo.out', immediateRender: true }, T.draw);
+  tl.fromTo($$('#eight .ol'), { opacity: 0 }, { opacity: 1, duration: 0.4, immediateRender: true }, T.fly + 0.2);
+  // on-beat breathing of the big 8 (bars 1 and 2)
+  [2.0, 4.0].forEach(b => {
+    tl.fromTo(eightP, { pulse: 1 }, { pulse: 1.04, duration: 0.08, ease: 'power2.out', immediateRender: false }, b);
+    tl.fromTo(eightP, { pulse: 1.04 }, { pulse: 1, duration: 0.4, ease: 'power2.out', immediateRender: false }, b + 0.08);
+  });
 
   const q1 = makeText(txt, I.q1, { y: I.y.q1, cls: 'q1' });
   const q2 = makeText(txt, I.q2, { y: I.y.q2, cls: 'q2' });
-  wordsIn(tl, q1.words, T.q1); wordsIn(tl, q2.words, T.q2, { stagger: 0.11 });
-  wordsOut(tl, q1.words, T.qOut); wordsOut(tl, q2.words, T.qOut + 0.08);
+  wordsIn(tl, q1.words, T.q1); wordsIn(tl, q2.words, T.q2, { stagger: 0.08 });
+  wordsOut(tl, q1.words, T.qOut); wordsOut(tl, q2.words, T.qOut + 0.05);
 
   const ti = makeText(txt, I.title, { y: I.y.title, cls: 'q2' });
   const va = makeText(txt, I.values.join(' · '), { y: I.y.values, cls: 'values' });
   va.words.forEach(w => { if (w.textContent === '·'){ w.textContent = ''; w.className = 'w sepw'; const d = document.createElement('i'); d.className = 'sep'; w.appendChild(d); } });
-  wordsIn(tl, ti.words, T.title, { stagger: 0.12 }); wordsIn(tl, va.words, T.values, { stagger: 0.14 });
-  wordsOut(tl, ti.words, T.introOut); wordsOut(tl, va.words, T.introOut + 0.06);
-  tl.fromTo(base, { opacity: 1 }, { opacity: 0, duration: 0.5, immediateRender: false }, T.introOut);
+  wordsIn(tl, ti.words, T.title, { stagger: 0.08 }); wordsIn(tl, va.words, T.values, { stagger: 0.1 });
+  wordsOut(tl, ti.words, T.introOut); wordsOut(tl, va.words, T.introOut + 0.04);
 
-  // ۸ rises to its place as the progress indicator; the red drains to an empty outline roof
+  // the 8 rises to become the progress indicator; the red drains to an outline
   tl.fromTo(eightP, { x: E.intro.x, y: E.intro.y, s: E.intro.s }, { x: E.progress.x, y: E.progress.y, s: E.progress.s, duration: T.flyDur, ease: 'power3.inOut', immediateRender: false }, T.fly);
-  tl.fromTo(SEGS.flatMap(s => s.cap ? [s.ri, s.cap.ri] : [s.ri]), { opacity: 1 }, { opacity: 0, duration: 0.55, stagger: { each: 0.03, from: 'end' }, ease: 'power1.in', immediateRender: false }, T.fly + 0.05);
+  tl.fromTo(ri, { opacity: 1 }, { opacity: 0, duration: 0.4, stagger: { each: 0.025, from: 'end' }, ease: 'power1.in', immediateRender: false }, T.fly + 0.05);
 }
 
 function buildPromise(cfg, i){
@@ -496,16 +480,19 @@ function buildPromise(cfg, i){
   const ord = makeText(host, cfg.ord, { y: Ly.ordY, cls: 'ord', h: 80 });
   const r1 = document.createElement('i'), r2 = document.createElement('i'); r1.className = r2.className = 'rule';
   ord.line.prepend(r1); ord.line.append(r2);
-  wordsIn(tl, ord.words, s0 + PT.ord, { dur: 0.6 });
-  tl.fromTo([r1, r2], { scaleX: 0, opacity: 0 }, { scaleX: 1, opacity: 1, duration: 0.8, ease: 'power3.out', immediateRender: true }, s0 + PT.ord + 0.15);
+  wordsIn(tl, ord.words, s0 + PT.ord, { dur: 0.45 });
+  tl.fromTo([r1, r2], { scaleX: 0, opacity: 0 }, { scaleX: 1, opacity: 1, duration: 0.5, ease: 'power3.out', immediateRender: true }, s0 + PT.ord + 0.1);
 
-  // line-art hero
+  // line-art hero, animated in its own sub-timeline played faster
   const art = document.createElementNS(SVGNS, 'svg');
   art.setAttribute('class', 'art'); art.setAttribute('viewBox', '-220 -200 440 400');
   Object.assign(art.style, { left: (Ly.cx - 220) + 'px', top: (Ly.artY - 200) + 'px', width: '440px', height: '400px' });
   art.innerHTML = ART[cfg.art].svg(); host.appendChild(art); prepDraw(art);
   tl.fromTo(art, { opacity: 1, x: 0, filter: 'blur(0px)' }, { opacity: 1, duration: 0.01, immediateRender: true }, s0);
-  ART[cfg.art].anim(tl, art, s0 + PT.art);
+  const sub = gsap.timeline({ paused: false });
+  ART[cfg.art].anim(sub, art, 0);
+  sub.timeScale(CONFIG.motion.art);
+  tl.add(sub, s0 + PT.art);
 
   // red hero: counter or word
   const hero = div('hero', host, { top: (Ly.heroY - 150) + 'px', height: '300px' });
@@ -514,39 +501,38 @@ function buildPromise(cfg, i){
   if (cfg.hero.unit){ unit = document.createElement('span'); unit.className = 'unit'; unit.textContent = cfg.hero.unit; hero.appendChild(unit); }
   if (cfg.hero.word){
     num.textContent = cfg.hero.word;
-    tl.fromTo(num, { clipPath: HIDE_R, x: 40, filter: 'blur(14px)', opacity: 0 },
-      { clipPath: SHOW, x: 0, filter: 'blur(0px)', opacity: 1, duration: 1.1, ease: 'power3.out', immediateRender: true }, s0 + PT.hero);
+    tl.fromTo(num, { clipPath: HIDE_R, x: 50, filter: 'blur(12px)', opacity: 0 },
+      { clipPath: SHOW, x: 0, filter: 'blur(0px)', opacity: 1, duration: 0.6, ease: 'expo.out', immediateRender: true }, s0 + PT.hero);
   } else {
     const pr = { v: 0 }, sfx = cfg.hero.suffix || '';
     num.textContent = fa(cfg.hero.count) + sfx;              // for width fitting
     counters.push({ el: num, p: pr, sfx });
     tl.fromTo(pr, { v: 0 }, { v: cfg.hero.count, duration: PT.count, ease: 'power2.out', immediateRender: true }, s0 + PT.hero);
-    tl.fromTo(num, { y: 40, filter: 'blur(14px)', opacity: 0 }, { y: 0, filter: 'blur(0px)', opacity: 1, duration: 0.9, ease: 'power3.out', immediateRender: true }, s0 + PT.hero);
+    tl.fromTo(num, { y: 50, filter: 'blur(12px)', opacity: 0 }, { y: 0, filter: 'blur(0px)', opacity: 1, duration: 0.5, ease: 'expo.out', immediateRender: true }, s0 + PT.hero);
   }
-  if (unit) tl.fromTo(unit, { clipPath: HIDE_R, x: 20, opacity: 0 }, { clipPath: SHOW, x: 0, opacity: 1, duration: 0.7, immediateRender: true }, s0 + PT.hero + 0.45);
+  if (unit) tl.fromTo(unit, { clipPath: HIDE_R, x: 20, opacity: 0 }, { clipPath: SHOW, x: 0, opacity: 1, duration: 0.45, immediateRender: true }, s0 + PT.hero + 0.25);
 
-  // the matching red segment of the ۸ fills, with a calm pulse
-  const sg = SEGS[i];
-  tl.fromTo(sg.rf, { attr: { 'stroke-dasharray': '0 1000' } }, { attr: { 'stroke-dasharray': `${sg.L} 1000` }, duration: 0.6, ease: 'power2.inOut', immediateRender: true }, s0 + PT.fill);
-  if (sg.cap) tl.fromTo(sg.cap.rf, { opacity: 0 }, { opacity: 1, duration: 0.12, immediateRender: true }, s0 + PT.fill + (sg.leg === 'R' ? 0.5 : 0));
-  tl.fromTo(eightP, { pulse: 1 }, { pulse: 1.1, duration: 0.25, ease: 'power2.out', immediateRender: false }, s0 + PT.fill + 0.45);
-  tl.fromTo(eightP, { pulse: 1.1 }, { pulse: 1, duration: 0.6, ease: 'power2.inOut', immediateRender: false }, s0 + PT.fill + 0.7);
+  // the matching red segment of the 8 fills, landing on the beat, with a pulse
+  const sg = SEGS[i], hit = s0 + PT.fill + PT.fillDur;
+  tl.fromTo(sg.rf, { attr: { 'stroke-dasharray': '0 100' } }, { attr: { 'stroke-dasharray': `${sg.L} ${100 - sg.L}` }, duration: PT.fillDur, ease: 'power2.in', immediateRender: true }, s0 + PT.fill);
+  tl.fromTo(eightP, { pulse: 1 }, { pulse: 1.14, duration: 0.1, ease: 'power2.out', immediateRender: false }, hit);
+  tl.fromTo(eightP, { pulse: 1.14 }, { pulse: 1, duration: 0.45, ease: 'power2.out', immediateRender: false }, hit + 0.1);
 
   // title + detail
   const title = makeText(host, cfg.title, { y: Ly.titleY, cls: 'title', h: 110 });
   const detail = makeText(host, cfg.detail, { y: Ly.detailY, cls: 'detail', h: 120, wrap: true });
-  wordsIn(tl, title.words, s0 + PT.title, { stagger: 0.09 });
-  wordsIn(tl, detail.words, s0 + PT.detail, { stagger: 0.06, dur: 0.7 });
+  wordsIn(tl, title.words, s0 + PT.title, { stagger: 0.06 });
+  wordsIn(tl, detail.words, s0 + PT.detail, { stagger: 0.045, dur: 0.5 });
 
   // exit (toward the left)
   const o = s0 + PT.out;
   wordsOut(tl, ord.words, o);
-  tl.fromTo([r1, r2], { scaleX: 1, opacity: 1 }, { scaleX: 0, opacity: 0, duration: 0.4, ease: 'power2.in', immediateRender: false }, o);
-  tl.fromTo(art, { opacity: 1, x: 0, filter: 'blur(0px)' }, { opacity: 0, x: -50, filter: 'blur(8px)', duration: 0.55, ease: 'power2.in', immediateRender: false }, o + 0.03);
+  tl.fromTo([r1, r2], { scaleX: 1, opacity: 1 }, { scaleX: 0, opacity: 0, duration: 0.3, ease: 'power2.in', immediateRender: false }, o);
+  tl.fromTo(art, { opacity: 1, x: 0, filter: 'blur(0px)' }, { opacity: 0, x: -60, filter: 'blur(8px)', duration: 0.38, ease: 'power2.in', immediateRender: false }, o + 0.02);
   const heroOut = unit ? [num, unit] : [num];
-  tl.fromTo(heroOut, { clipPath: SHOW, x: 0, opacity: 1, filter: 'blur(0px)' }, { clipPath: HIDE_L, x: -30, opacity: 0, filter: 'blur(8px)', duration: 0.55, ease: 'power2.in', immediateRender: false }, o + 0.06);
-  wordsOut(tl, title.words, o + 0.09);
-  wordsOut(tl, detail.words, o + 0.12, { stagger: 0.03 });
+  tl.fromTo(heroOut, { clipPath: SHOW, x: 0, opacity: 1, filter: 'blur(0px)' }, { clipPath: HIDE_L, x: -40, opacity: 0, filter: 'blur(8px)', duration: 0.38, ease: 'power2.in', immediateRender: false }, o + 0.04);
+  wordsOut(tl, title.words, o + 0.06);
+  wordsOut(tl, detail.words, o + 0.08, { stagger: 0.02 });
   return { hero: num };
 }
 
@@ -571,47 +557,48 @@ function fitHeroes(){
 }
 
 function buildFinale(){
-  const F = CONFIG.t.finale, FT = CONFIG.finale.t, svg = $('#finaleSvg'), txt = $('#texts');
-  // walls (start top-right → down → floor leftwards → up), ground hairline
+  const F = CONFIG.t.finale, FT = CONFIG.finale.t, svg = $('#finaleSvg'), txt = $('#texts'), Fin = E.final;
+  // the appliances, sheltered under the ∞
   svg.innerHTML = `
-    <g id="house" transform="translate(45 0)">
+    <g id="home" transform="translate(45 -120)">
       <path class="ln a d" d="M 850 1132 H 130"/>
-      <path class="ln d b walls" d="M 758 884 V 1132 H 232 V 884"/>
       <g class="item"><rect class="ln d" x="606" y="868" width="118" height="264" rx="8"/><path class="ln d" d="M 606 958 H 724"/>
         <path class="ln d b" d="M 622 884 V 938 M 622 974 V 1040"/></g>
       <g class="item"><rect class="ln d" x="434" y="990" width="140" height="142" rx="8"/><path class="ln a d" d="M 434 1018 H 574"/>
         <circle class="ln d" cx="504" cy="1076" r="38"/><circle class="ln a d" cx="504" cy="1076" r="25"/><circle class="ln d" cx="550" cy="1004" r="5"/></g>
       <g class="item"><rect class="ln d" x="262" y="936" width="150" height="96" rx="6"/><path class="ln d" d="M 318 1032 L 308 1066 M 356 1032 L 366 1066"/>
         <rect class="ln d" x="270" y="1066" width="134" height="66" rx="4"/><path class="ln a d" d="M 337 1066 V 1132"/></g>
-      <g class="item"><path class="ln a d" d="M 495 520 V 640"/><path class="ln d b" d="M 466 674 L 524 674 L 511 640 L 479 640 Z"/></g>
-      <path class="ln a lamp" d="M 470 690 L 404 800 M 520 690 L 586 800" style="opacity:0"/>
     </g>`;
   prepDraw(svg);
-  const f = F;
-  // segments fly apart, then gather as the ۸ grows into the roof
-  tl.fromTo(eightP, { ex: 0 }, { ex: E.explode, duration: 0.55, ease: 'power2.out', immediateRender: false }, f + FT.explode);
-  tl.fromTo(eightP, { ex: E.explode }, { ex: 0, duration: 0.8, ease: 'power3.in', immediateRender: false }, f + FT.fly + FT.flyDur - 0.8);
-  tl.fromTo(eightP, { x: E.progress.x, y: E.progress.y, s: E.progress.s, hw: E.halfW, ay: E.apexY, sw: E.stroke },
-    { x: E.roof.x, y: E.roof.y, s: E.roof.s, hw: E.roof.halfW, ay: E.roof.apexY, sw: E.roof.stroke, duration: FT.flyDur, ease: 'power3.inOut', immediateRender: false }, f + FT.fly);
-  tl.fromTo(eightP, { pulse: 1 }, { pulse: 1.025, duration: 0.18, ease: 'power2.out', immediateRender: false }, f + FT.fly + FT.flyDur);
-  tl.fromTo(eightP, { pulse: 1.025 }, { pulse: 1, duration: 0.7, ease: 'power2.inOut', immediateRender: false }, f + FT.fly + FT.flyDur + 0.18);
+  const f = F, lock = f + FT.fly + FT.flyDur, land = f + FT.rot + FT.rotDur;
+  // segments fly apart, then gather on the beat as the 8 moves to center…
+  tl.fromTo(eightP, { ex: 0 }, { ex: E.explode, duration: 0.4, ease: 'power2.out', immediateRender: false }, f + FT.explode);
+  tl.fromTo(eightP, { ex: E.explode }, { ex: 0, duration: 0.5, ease: 'power3.in', immediateRender: false }, lock - 0.5);
+  tl.fromTo(eightP, { x: E.progress.x, y: E.progress.y, s: E.progress.s },
+    { x: Fin.x, y: Fin.y, s: Fin.s, duration: FT.flyDur, ease: 'power3.inOut', immediateRender: false }, f + FT.fly);
+  // …then turns 90° and becomes ∞ (lands on the next downbeat)
+  tl.fromTo(eightP, { rot: 0, k: E.topK, w: E.width, sw: E.stroke }, { rot: Fin.rot, k: Fin.k, w: Fin.width, sw: Fin.stroke, duration: FT.rotDur, ease: 'power3.inOut', immediateRender: false }, f + FT.rot);
+  [[lock, 1.06], [land, 1.05]].forEach(([at, amt]) => {
+    tl.fromTo(eightP, { pulse: 1 }, { pulse: amt, duration: 0.1, ease: 'power2.out', immediateRender: false }, at);
+    tl.fromTo(eightP, { pulse: amt }, { pulse: 1, duration: 0.5, ease: 'power2.out', immediateRender: false }, at + 0.1);
+  });
 
-  drawIn(tl, $$('#house > .d', svg), f + FT.walls, { dur: 1.2, stagger: 0.15, ease: 'power2.inOut' });
-  $$('#house .item', svg).forEach((g, k) => drawIn(tl, $$('.d', g), f + FT.items + k*0.28, { dur: 0.9, stagger: 0.07 }));
-  tl.fromTo($('.lamp', svg), { opacity: 0 }, { opacity: 1, duration: 1.2, ease: 'power1.out', immediateRender: true }, f + FT.items + 1.4);
+  const home = $('#home', svg);
+  drawIn(tl, $$(':scope > .d', home), f + FT.items, { dur: 0.7, ease: 'power2.out' });
+  $$('.item', home).forEach((g, k) => drawIn(tl, $$('.d', g), f + FT.items + 0.05 + k*0.15, { dur: 0.6, stagger: 0.05, ease: 'power2.out' }));
 
   const ti = makeText(txt, CONFIG.finale.title, { y: CONFIG.finale.y.title, cls: 'title', h: 110 });
   const va = makeText(txt, CONFIG.finale.values.join(' · '), { y: CONFIG.finale.y.values, cls: 'values', h: 90 });
   va.words.forEach(w => { if (w.textContent === '·'){ w.textContent = ''; w.className = 'w sepw'; const d = document.createElement('i'); d.className = 'sep'; w.appendChild(d); } });
   const gr = makeText(txt, CONFIG.finale.group, { y: CONFIG.finale.y.group, cls: 'sub', h: 60 });
-  wordsIn(tl, ti.words, f + FT.title, { stagger: 0.12, dur: 0.9 });
-  wordsIn(tl, va.words, f + FT.values, { stagger: 0.16, dur: 0.8 });
-  tl.fromTo('#logo', { opacity: 0, y: 18, filter: 'blur(8px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.2, ease: 'power3.out', immediateRender: true }, f + FT.logo);
-  wordsIn(tl, gr.words, f + FT.logo + 0.35, { dur: 0.8 });
+  wordsIn(tl, ti.words, f + FT.title, { stagger: 0.1, dur: 0.6 });
+  wordsIn(tl, va.words, f + FT.values, { stagger: 0.12, dur: 0.55 });
+  tl.fromTo('#logo', { opacity: 0, y: 18, filter: 'blur(8px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.8, ease: 'expo.out', immediateRender: true }, f + FT.logo);
+  wordsIn(tl, gr.words, f + FT.logo + 0.25, { dur: 0.6 });
 
-  // calm push-in on the whole finale composition
-  tl.fromTo(['#finaleSvg', '#eightSvg'], { scale: 1, transformOrigin: '540px 800px' }, { scale: 1.03, duration: CONFIG.duration - f - FT.walls, ease: 'sine.inOut', immediateRender: false }, f + FT.walls);
-  tl.fromTo('#depthSvg', { opacity: 0.55 }, { opacity: 0.25, duration: 2, ease: 'none', immediateRender: false }, f);
+  // slow push-in on the final composition
+  tl.fromTo(['#finaleSvg', '#eightSvg'], { scale: 1, transformOrigin: '540px 800px' }, { scale: 1.03, duration: CONFIG.duration - land, ease: 'sine.inOut', immediateRender: false }, land);
+  tl.fromTo('#depthSvg', { opacity: 0.55 }, { opacity: 0.25, duration: 1.5, ease: 'none', immediateRender: false }, f);
 }
 
 function buildAtmosphere(){
@@ -648,15 +635,14 @@ window.renderAt = t => { seekTo(t); return tl.time(); };
 window.audioCues = () => {
   const T = CONFIG.t, PT = CONFIG.p, F = T.finale, FT = CONFIG.finale.t;
   return {
-    duration: CONFIG.duration, seed: CONFIG.seed,
+    duration: CONFIG.duration, seed: CONFIG.seed, bpm: CONFIG.bpm,
     hook: T.draw, question: T.q2, title: T.title, fly: T.fly, promiseStart: T.promiseStart, promiseDur: T.promiseDur,
     promises: CONFIG.promises.map((p, i) => {
       const s0 = T.promiseStart + i*T.promiseDur;
       return { start: s0, counter: !p.hero.word, heroIn: s0 + PT.hero, countDur: PT.count,
-               fill: s0 + PT.fill + 0.55, exit: s0 + PT.out };
+               fill: s0 + PT.fill + PT.fillDur, exit: s0 + PT.out };
     }),
-    finale: { start: F, explode: F + FT.explode, lock: F + FT.fly + FT.flyDur, walls: F + FT.walls,
-              title: F + FT.title, logo: F + FT.logo }
+    finale: { start: F, lock: F + FT.fly + FT.flyDur, inf: F + FT.rot + FT.rotDur, title: F + FT.title, logo: F + FT.logo }
   };
 };
 

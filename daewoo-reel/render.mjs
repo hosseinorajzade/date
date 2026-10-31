@@ -4,7 +4,7 @@
 //   node render.mjs --stills 0,1.5,12,64    PNG stills → out/stills/
 //   node render.mjs --from 7 --to 14        partial render (preview)
 //   node render.mjs --audio-only            rebuild the soundtrack and remux it into the existing MP4
-//   options: --workers 4  --crf 17  --out path.mp4
+//   options: --workers 4  --crf 19  --out path.mp4
 //
 // Every frame is produced with tl.seek(frame / fps), so output is deterministic.
 // GSAP and Vazirmatn are served from node_modules (requests to cdnjs / Google Fonts are intercepted),
@@ -21,7 +21,7 @@ const argv = process.argv.slice(2);
 const arg = (k, d) => { const i = argv.indexOf('--' + k); return i >= 0 ? argv[i + 1] : d; };
 const FPS = 30;
 const WORKERS = +arg('workers', 4);
-const CRF = arg('crf', '17');
+const CRF = arg('crf', '19');
 const OUT = path.resolve(ROOT, arg('out', 'out/daewoo-8-promises.mp4'));
 const STILLS = arg('stills', null);
 const AUDIO_ONLY = argv.includes('--audio-only');
@@ -121,7 +121,7 @@ await Promise.all(Array.from({ length: WORKERS }, async (_, w) => {
   const page = await openPage(wb);
   const ff = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'png', '-i', '-',
     '-vf', 'scale=out_color_matrix=bt709:out_range=tv,format=yuv420p',
-    '-c:v', 'libx264', '-preset', 'slow', '-crf', CRF, '-profile:v', 'high', '-level', '4.2', '-tune', 'film',
+    '-c:v', 'libx264', '-preset', 'slow', '-crf', CRF, '-maxrate', '9M', '-bufsize', '18M', '-profile:v', 'high', '-level', '4.2', '-tune', 'film',
     '-g', '60', '-bf', '2', '-x264-params', 'keyint=60:min-keyint=60:scenecut=0',
     '-colorspace', 'bt709', '-color_primaries', 'bt709', '-color_trc', 'bt709', '-color_range', 'tv',
     '-r', String(FPS), file], { stdio: ['pipe', 'inherit', 'inherit'] });
