@@ -57,14 +57,16 @@ async function openPage(browser) {
   });
   page.on('pageerror', e => console.error('[page]', e.message));
   await page.goto(`${BASE}/index.html?render=1`, { waitUntil: 'load' });
-  await page.waitForFunction('window.__ready === true', { timeout: 60000 });
+  await page.waitForFunction('window.__ready === true', { timeout: 60000, polling: 100 });
   return page;
 }
 
-const browser = await puppeteer.launch({
+const launch = () => puppeteer.launch({
   executablePath: CHROME, headless: true,
-  args: ['--no-sandbox', '--force-color-profile=srgb', '--font-render-hinting=none', '--hide-scrollbars', '--disable-lcd-text']
+  args: ['--no-sandbox', '--force-color-profile=srgb', '--font-render-hinting=none', '--hide-scrollbars', '--disable-lcd-text',
+    '--disable-background-timer-throttling', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows']
 });
+const browser = await launch();
 const duration = await (async () => { const p = await openPage(browser); const d = await p.evaluate('CONFIG.duration'); await p.close(); return d; })();
 const shot = (page, t) => page.evaluate(t => window.renderAt(t), t).then(() => page.screenshot({ type: 'png', clip: { x: 0, y: 0, width: 1080, height: 1920 }, captureBeyondViewport: false }));
 
@@ -92,7 +94,8 @@ await Promise.all(Array.from({ length: WORKERS }, async (_, w) => {
   const a = f0 + w * chunk, b = Math.min(f1, a + chunk);
   if (a >= b) return;
   const file = path.join(tmp, `seg${w}.mp4`); segs[w] = file;
-  const page = await openPage(browser);
+  const wb = await launch();   // one browser per worker: no background-tab throttling
+  const page = await openPage(wb);
   const ff = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'png', '-i', '-',
     '-vf', 'scale=out_color_matrix=bt709:out_range=tv,format=yuv420p',
     '-c:v', 'libx264', '-preset', 'slow', '-crf', CRF, '-profile:v', 'high', '-level', '4.2', '-tune', 'film',
@@ -105,7 +108,7 @@ await Promise.all(Array.from({ length: WORKERS }, async (_, w) => {
     if (!ff.stdin.write(buf)) await new Promise(r => ff.stdin.once('drain', r));
     if (++done % 60 === 0) { const s = (Date.now() - t0) / 1000; console.log(`  ${done}/${total}  ${(done / s).toFixed(1)} fps  eta ${Math.round((total - done) / (done / s))}s`); }
   }
-  ff.stdin.end(); await closed; await page.close();
+  ff.stdin.end(); await closed; await wb.close();
 }));
 await browser.close(); server.close();
 
