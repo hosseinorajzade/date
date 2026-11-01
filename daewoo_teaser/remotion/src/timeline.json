@@ -1,0 +1,42 @@
+{
+  "fps": 30,
+  "bpm": 120,
+  "total": 43.0,
+  "shots": [
+    {"id": "s1", "clip": "s12.mp4", "start": 0, "end": 3, "clipOffset": 0},
+    {"id": "s2", "clip": "s12.mp4", "start": 3, "end": 6, "clipOffset": 3},
+    {"id": "s3", "clip": "s3.mp4", "start": 6, "end": 10, "clipOffset": 0},
+    {"id": "s4", "clip": "s4.mp4", "start": 10, "end": 14, "clipOffset": 0},
+    {"id": "s5", "clip": "s5.mp4", "start": 14, "end": 17, "clipOffset": 0},
+    {"id": "s6", "clip": "s6.mp4", "start": 17, "end": 22, "clipOffset": 0},
+    {"id": "s7", "clip": "s7.mp4", "start": 22, "end": 26, "clipOffset": 0},
+    {"id": "s8", "clip": "s8.mp4", "start": 26, "end": 29, "clipOffset": 0},
+    {"id": "s9", "clip": "s9.mp4", "start": 29, "end": 33, "clipOffset": 0},
+    {"id": "s10", "clip": "s10.mp4", "start": 33, "end": 38, "clipOffset": 0},
+    {"id": "end", "clip": null, "start": 38, "end": 43, "clipOffset": 0}
+  ],
+  "titles": [
+    {"key": "directDrive", "in": 6.5, "out": 10.0},
+    {"key": "modes", "in": 10.5, "out": 14.0},
+    {"key": "energy", "in": 17.5, "out": 22.0},
+    {"key": "jet", "in": 22.5, "out": 26.0},
+    {"key": "addItem", "in": 26.5, "out": 29.0},
+    {"key": "capacity", "in": 29.5, "out": 33.0}
+  ],
+  "charisma": {"in": 3.0, "out": 6.0},
+  "typing": {"text": "Charisma 9Kg", "start": 33.5, "step": 0.125, "out": 38.0},
+  "transitions": [
+    {"t": 0, "type": "open"},
+    {"t": 6, "type": "whipH"},
+    {"t": 10, "type": "flash"},
+    {"t": 14, "type": "zoomIn"},
+    {"t": 17, "type": "glitch"},
+    {"t": 22, "type": "sweep"},
+    {"t": 26, "type": "whipV"},
+    {"t": 29, "type": "redFlash"},
+    {"t": 33, "type": "spin"},
+    {"t": 38, "type": "glitchOut"}
+  ],
+  "accents": [14.5, 25.5, 32.0],
+  "logo": {"impact": 38.0, "wordmark": [38.25, 39.0], "symbol": 39.0, "url": 39.5, "fadeOut": [41.5, 43.0]}
+}

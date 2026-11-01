@@ -17,7 +17,7 @@ export const loadFonts = () => {
   Promise.all(
     faces.map(([family, file, weight]) => {
       const face = new FontFace(family, `url(${staticFile(file)}) format('woff2')`, {weight});
-      document.fonts.add(face);
+      (document.fonts as unknown as {add: (f: FontFace) => void}).add(face);
       return face.load();
     }),
   )
