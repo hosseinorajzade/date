@@ -1,0 +1,14 @@
+node_modules/
+raw/
+prep/
+work/
+audio/
+remotion/public/clips/
+remotion/public/stills/
+remotion/out/
+review/*
+!review/contact_*.png
+!review/storyboard.png
+!review/text_test_sheet.png
+!review/text_fix_check.png
+*.mp4
