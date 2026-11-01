@@ -27,10 +27,15 @@ const CAMERA: Record<string, Cam> = {
   s10: (p) => ({scale: lerp(1.0, 1.12)(p)}),
 };
 
-const GradientFade: React.FC<{dur: number}> = ({dur}) => {
+const GradientFade: React.FC<{dur: number; strong?: boolean}> = ({dur, strong}) => {
   const fr = useCurrentFrame();
   const o = Math.min(interpolate(fr, [0, 8], [0, 1], clamp), interpolate(fr, [dur - 8, dur], [1, 0], clamp));
-  return <BottomGradient opacity={o} />;
+  return (
+    <>
+      <BottomGradient opacity={o} />
+      {strong ? <BottomGradient opacity={o * 0.7} /> : null}
+    </>
+  );
 };
 
 const Overlays: React.FC = () => {
@@ -113,7 +118,7 @@ export const Teaser: React.FC = () => {
         const dur = f(t.out) - f(t.in);
         return (
           <Sequence key={t.key} from={f(t.in)} durationInFrames={dur} name={`title ${t.key}`}>
-            <GradientFade dur={dur} />
+            <GradientFade dur={dur} strong={t.key === 'addItem'} />
             <Caption title={c.title} desc={c.desc} durationInFrames={dur} titleSize={c.size} />
           </Sequence>
         );
