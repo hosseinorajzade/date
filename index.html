@@ -377,6 +377,97 @@
         }
 
         .work-link:hover { text-decoration: underline; }
+
+        /* --- Video card in the activity grid (opens the dental teaser) --- */
+        .video-card {
+            font: inherit;
+            color: #fff;
+            border: 2px solid transparent;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 12px 8px;
+            min-height: 64px;
+            text-align: center;
+            font-family: 'Vazirmatn', 'Inter', sans-serif;
+            background:
+                linear-gradient(to top, rgba(58, 28, 32, 0.82), rgba(58, 28, 32, 0.25)),
+                url('media/dental-3d-poster.jpg') center 40% / cover;
+        }
+
+        .video-card:hover {
+            background:
+                linear-gradient(to top, rgba(58, 28, 32, 0.75), rgba(58, 28, 32, 0.1)),
+                url('media/dental-3d-poster.jpg') center 40% / cover;
+        }
+
+        .video-card .option-title { margin-bottom: 0; font-size: 0.85rem; white-space: nowrap; text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5); }
+        .video-card .option-desc { opacity: 0.9; white-space: nowrap; text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5); }
+        .video-card-text { display: flex; flex-direction: column; align-items: center; line-height: 1.5; }
+
+        .video-card-play {
+            flex: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--accent-pink);
+            box-shadow: 0 4px 12px rgba(235, 67, 99, 0.45);
+            display: grid;
+            place-items: center;
+        }
+
+        .video-card-play::after {
+            content: "";
+            margin-left: 3px;
+            border-style: solid;
+            border-width: 6px 0 6px 10px;
+            border-color: transparent transparent transparent #fff;
+        }
+
+        /* --- Video player overlay --- */
+        .video-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            background: rgba(30, 12, 16, 0.72);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+        }
+
+        .video-modal[hidden] { display: none; }
+
+        .video-modal-inner { position: relative; }
+
+        .video-modal video {
+            display: block;
+            height: min(86vh, calc((100vw - 32px) * 16 / 9));
+            aspect-ratio: 9 / 16;
+            max-width: 100%;
+            border-radius: 20px;
+            background: #000;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        .video-modal-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1;
+            width: 40px;
+            height: 40px;
+            border: 0;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.55);
+            color: #fff;
+            font-size: 1.5rem;
+            line-height: 1;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -434,9 +525,14 @@
             <div class="option-card" onclick="selectOption('activity', 'Coffee', this)">
                 <div class="option-title"><span class="emoji">☕</span> Coffee</div>
             </div>
-            <div class="option-card" onclick="selectOption('activity', 'Walk', this)">
-                <div class="option-title"><span class="emoji">🌳</span> Walk in the park</div>
-            </div>
+            <button type="button" class="option-card video-card" id="dental-card" dir="rtl" lang="fa"
+                    aria-label="پخش تیزر سه‌بعدی کلینیک دندانپزشکی">
+                <span class="video-card-play" aria-hidden="true"></span>
+                <span class="video-card-text">
+                    <span class="option-title">تیزر سه‌بعدی</span>
+                    <span class="option-desc">دندانپزشکی</span>
+                </span>
+            </button>
         </div>
 
         <button id="step2-btn" class="btn-primary continue-btn animate-up delay-4" disabled onclick="submitStep2()">Pick a time to continue</button>
@@ -479,6 +575,15 @@
         <a class="work-link" href="work.html">جزئیات بیشتر ←</a>
     </section>
 
+    <!-- VIDEO PLAYER OVERLAY (dental teaser) -->
+    <div class="video-modal" id="video-modal" role="dialog" aria-modal="true" aria-label="تیزر سه‌بعدی کلینیک دندانپزشکی" hidden>
+        <div class="video-modal-inner">
+            <button class="video-modal-close" id="video-modal-close" type="button" aria-label="بستن">×</button>
+            <video id="modal-video" src="media/dental-3d.mp4" poster="media/dental-3d-poster.jpg"
+                   preload="none" playsinline controls></video>
+        </div>
+    </div>
+
     <script>
         // --- Move NO Button Logic ---
         const noBtn = document.getElementById('no-btn');
@@ -506,6 +611,23 @@
             workVideo.pause();
             workSample.classList.add('hidden');
         }
+
+        // --- Dental teaser: card in the activity grid opens the player overlay ---
+        const videoModal = document.getElementById('video-modal');
+        const modalVideo = document.getElementById('modal-video');
+        function openDentalVideo() {
+            videoModal.hidden = false;
+            modalVideo.currentTime = 0;
+            modalVideo.play();
+        }
+        function closeDentalVideo() {
+            modalVideo.pause();
+            videoModal.hidden = true;
+        }
+        document.getElementById('dental-card').addEventListener('click', openDentalVideo);
+        document.getElementById('video-modal-close').addEventListener('click', closeDentalVideo);
+        videoModal.addEventListener('click', (e) => { if (e.target === videoModal) closeDentalVideo(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !videoModal.hidden) closeDentalVideo(); });
 
         // --- State Management ---
         const state = { date: null, time: null, activity: null, food: null };
