@@ -289,87 +289,85 @@
 
         .work-sample .overline { margin-bottom: 6px; letter-spacing: 1px; }
 
-        .work-sample h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.6rem;
-            margin: 0 0 18px;
-            letter-spacing: 0.08em;
+        .work-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-top: 6px;
         }
 
-        .work-sample h2 span {
-            display: block;
-            font-family: 'Inter', sans-serif;
-            font-size: 0.7rem;
-            letter-spacing: 0.3em;
-            text-transform: uppercase;
-            color: var(--accent-pink);
-            margin-top: 4px;
+        .work-tile {
+            font: inherit;
+            color: inherit;
+            background: none;
+            border: 0;
+            padding: 0;
+            cursor: pointer;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
         }
 
-        .work-video {
+        .work-thumb {
             position: relative;
-            width: min(100%, 300px);
+            display: block;
+            width: 100%;
             aspect-ratio: 9 / 16;
-            margin: 0 auto;
-            border-radius: 22px;
+            border-radius: 18px;
             overflow: hidden;
-            background: #0b0907;
-            box-shadow: 0 18px 40px rgba(58, 28, 32, 0.25);
+            background: #1a1214;
+            box-shadow: 0 14px 30px rgba(58, 28, 32, 0.22);
+            margin-bottom: 10px;
+            transition: var(--transition-smooth);
         }
 
-        .work-video video {
+        .work-tile:hover .work-thumb,
+        .work-tile:focus-visible .work-thumb {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 36px rgba(58, 28, 32, 0.3);
+        }
+
+        .work-tile:focus-visible { outline: none; }
+        .work-tile:focus-visible .work-thumb { outline: 3px solid var(--accent-pink); outline-offset: 3px; }
+
+        .work-thumb video {
             display: block;
             width: 100%;
             height: 100%;
             object-fit: cover;
+            pointer-events: none;
         }
 
         .work-play {
             position: absolute;
-            inset: 0;
-            border: 0;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0) 50%);
-            cursor: pointer;
-            transition: opacity 0.3s ease;
-        }
-
-        .work-play span {
-            width: 66px;
-            height: 66px;
+            left: 10px;
+            top: 10px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             background: var(--accent-pink);
-            box-shadow: 0 8px 20px rgba(235, 67, 99, 0.4);
+            box-shadow: 0 6px 16px rgba(235, 67, 99, 0.45);
             display: grid;
             place-items: center;
-            transition: var(--transition-smooth);
         }
 
-        .work-play span::after {
+        .work-play::after {
             content: "";
-            margin-left: 5px;
+            margin-left: 4px;
             border-style: solid;
-            border-width: 11px 0 11px 18px;
+            border-width: 7px 0 7px 11px;
             border-color: transparent transparent transparent #fff;
         }
 
-        .work-play:hover span { transform: scale(1.06); }
-
-        .work-video.playing .work-play { opacity: 0; pointer-events: none; }
-
-        .work-caption {
-            margin: 16px 0 0;
-            font-size: 0.9rem;
-            line-height: 1.8;
-            opacity: 0.8;
-        }
+        .work-name { font-weight: 600; font-size: 0.95rem; line-height: 1.5; }
+        .work-name[dir="ltr"] { font-family: 'Playfair Display', serif; letter-spacing: 0.08em; }
+        .work-desc { font-size: 0.8rem; opacity: 0.75; line-height: 1.5; }
 
         .work-link {
             display: inline-block;
-            margin-top: 10px;
+            margin-top: 16px;
             color: var(--accent-pink);
             font-weight: 600;
             font-size: 0.9rem;
@@ -377,53 +375,6 @@
         }
 
         .work-link:hover { text-decoration: underline; }
-
-        /* --- Video card in the activity grid (opens the dental teaser) --- */
-        .video-card {
-            font: inherit;
-            color: #fff;
-            border: 2px solid transparent;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            padding: 12px 8px;
-            min-height: 64px;
-            text-align: center;
-            font-family: 'Vazirmatn', 'Inter', sans-serif;
-            background:
-                linear-gradient(to top, rgba(58, 28, 32, 0.82), rgba(58, 28, 32, 0.25)),
-                url('media/dental-3d-poster.jpg') center 40% / cover;
-        }
-
-        .video-card:hover {
-            background:
-                linear-gradient(to top, rgba(58, 28, 32, 0.75), rgba(58, 28, 32, 0.1)),
-                url('media/dental-3d-poster.jpg') center 40% / cover;
-        }
-
-        .video-card .option-title { margin-bottom: 0; font-size: 0.85rem; white-space: nowrap; text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5); }
-        .video-card .option-desc { opacity: 0.9; white-space: nowrap; text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5); }
-        .video-card-text { display: flex; flex-direction: column; align-items: center; line-height: 1.5; }
-
-        .video-card-play {
-            flex: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: var(--accent-pink);
-            box-shadow: 0 4px 12px rgba(235, 67, 99, 0.45);
-            display: grid;
-            place-items: center;
-        }
-
-        .video-card-play::after {
-            content: "";
-            margin-left: 3px;
-            border-style: solid;
-            border-width: 6px 0 6px 10px;
-            border-color: transparent transparent transparent #fff;
-        }
 
         /* --- Video player overlay --- */
         .video-modal {
@@ -525,14 +476,9 @@
             <div class="option-card" onclick="selectOption('activity', 'Coffee', this)">
                 <div class="option-title"><span class="emoji">☕</span> Coffee</div>
             </div>
-            <button type="button" class="option-card video-card" id="dental-card" dir="rtl" lang="fa"
-                    aria-label="پخش تیزر سه‌بعدی کلینیک دندانپزشکی">
-                <span class="video-card-play" aria-hidden="true"></span>
-                <span class="video-card-text">
-                    <span class="option-title">تیزر سه‌بعدی</span>
-                    <span class="option-desc">دندانپزشکی</span>
-                </span>
-            </button>
+            <div class="option-card" onclick="selectOption('activity', 'Walk', this)">
+                <div class="option-title"><span class="emoji">🌳</span> Walk in the park</div>
+            </div>
         </div>
 
         <button id="step2-btn" class="btn-primary continue-btn animate-up delay-4" disabled onclick="submitStep2()">Pick a time to continue</button>
@@ -562,25 +508,39 @@
         <div class="subtitle animate-up delay-1" id="final-summary" style="font-size: 1.1rem; margin-top: 20px;">I'll see you then.</div>
     </div>
 
-    <!-- WORK SAMPLE (shown on the main page) -->
+    <!-- WORK SAMPLES (shown on the main page) -->
     <section id="work-sample" class="work-sample" dir="rtl" lang="fa">
-        <div class="overline">نمونه کار</div>
-        <h2 dir="ltr">ORIGIN<span>The Art of Coffee</span></h2>
-        <div class="work-video" id="work-video">
-            <video id="work-video-el" src="media/origin-coffee.mp4" poster="media/origin-coffee-poster.jpg"
-                   preload="metadata" playsinline aria-label="ORIGIN — The Art of Coffee"></video>
-            <button class="work-play" id="work-play" type="button" aria-label="پخش ویدیو"><span></span></button>
+        <div class="overline">نمونه کارها</div>
+        <div class="work-grid">
+            <button type="button" class="work-tile" data-src="media/origin-coffee.mp4" data-poster="media/origin-coffee-poster.jpg"
+                    data-label="ORIGIN — The Art of Coffee" aria-label="پخش ویدیو: ORIGIN، تیزر محصول قهوه">
+                <span class="work-thumb">
+                    <video src="media/origin-coffee.mp4" poster="media/origin-coffee-poster.jpg"
+                           muted loop autoplay playsinline preload="metadata" aria-hidden="true" tabindex="-1"></video>
+                    <span class="work-play" aria-hidden="true"></span>
+                </span>
+                <span class="work-name" dir="ltr">ORIGIN</span>
+                <span class="work-desc">تیزر محصول قهوه</span>
+            </button>
+            <button type="button" class="work-tile" data-src="media/dental-3d.mp4" data-poster="media/dental-3d-poster.jpg"
+                    data-label="تیزر سه‌بعدی کلینیک دندانپزشکی" aria-label="پخش ویدیو: تیزر سه‌بعدی کلینیک دندانپزشکی">
+                <span class="work-thumb">
+                    <video src="media/dental-3d.mp4" poster="media/dental-3d-poster.jpg"
+                           muted loop autoplay playsinline preload="metadata" aria-hidden="true" tabindex="-1"></video>
+                    <span class="work-play" aria-hidden="true"></span>
+                </span>
+                <span class="work-name">کلینیک دندانپزشکی</span>
+                <span class="work-desc">تیزر انیمیشن سه‌بعدی</span>
+            </button>
         </div>
-        <p class="work-caption">تیزر تبلیغاتی عمودی محصول قهوه، ۲۳ ثانیه</p>
         <a class="work-link" href="work.html">جزئیات بیشتر ←</a>
     </section>
 
-    <!-- VIDEO PLAYER OVERLAY (dental teaser) -->
-    <div class="video-modal" id="video-modal" role="dialog" aria-modal="true" aria-label="تیزر سه‌بعدی کلینیک دندانپزشکی" hidden>
+    <!-- VIDEO PLAYER OVERLAY (plays a work sample with sound) -->
+    <div class="video-modal" id="video-modal" role="dialog" aria-modal="true" aria-label="پخش ویدیو" hidden>
         <div class="video-modal-inner">
             <button class="video-modal-close" id="video-modal-close" type="button" aria-label="بستن">×</button>
-            <video id="modal-video" src="media/dental-3d.mp4" poster="media/dental-3d-poster.jpg"
-                   preload="none" playsinline controls></video>
+            <video id="modal-video" preload="none" playsinline controls></video>
         </div>
     </div>
 
@@ -593,41 +553,32 @@
             noBtn.style.transform = `translate(${x}px, ${y}px) scale(0.9)`;
         });
 
-        // --- Work sample video (main page only) ---
+        // --- Work samples (main page only): muted previews, tap opens the player with sound ---
         const workSample = document.getElementById('work-sample');
-        const workVideoBox = document.getElementById('work-video');
-        const workVideo = document.getElementById('work-video-el');
-        document.getElementById('work-play').addEventListener('click', () => {
-            workVideo.controls = true;
-            workVideo.play();
-        });
-        workVideo.addEventListener('play', () => workVideoBox.classList.add('playing'));
-        workVideo.addEventListener('ended', () => {
-            workVideoBox.classList.remove('playing');
-            workVideo.controls = false;
-            workVideo.currentTime = 0;
-        });
-        function hideWorkSample() {
-            workVideo.pause();
-            workSample.classList.add('hidden');
-        }
-
-        // --- Dental teaser: card in the activity grid opens the player overlay ---
+        const previews = workSample.querySelectorAll('.work-thumb video');
         const videoModal = document.getElementById('video-modal');
         const modalVideo = document.getElementById('modal-video');
-        function openDentalVideo() {
+        function openVideo(tile) {
+            previews.forEach(v => v.pause());
+            modalVideo.src = tile.dataset.src;
+            modalVideo.poster = tile.dataset.poster;
+            videoModal.setAttribute('aria-label', tile.dataset.label);
             videoModal.hidden = false;
-            modalVideo.currentTime = 0;
             modalVideo.play();
         }
-        function closeDentalVideo() {
+        function closeVideo() {
             modalVideo.pause();
             videoModal.hidden = true;
+            if (!workSample.classList.contains('hidden')) previews.forEach(v => v.play().catch(() => {}));
         }
-        document.getElementById('dental-card').addEventListener('click', openDentalVideo);
-        document.getElementById('video-modal-close').addEventListener('click', closeDentalVideo);
-        videoModal.addEventListener('click', (e) => { if (e.target === videoModal) closeDentalVideo(); });
-        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !videoModal.hidden) closeDentalVideo(); });
+        workSample.querySelectorAll('.work-tile').forEach(tile => tile.addEventListener('click', () => openVideo(tile)));
+        document.getElementById('video-modal-close').addEventListener('click', closeVideo);
+        videoModal.addEventListener('click', (e) => { if (e.target === videoModal) closeVideo(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !videoModal.hidden) closeVideo(); });
+        function hideWorkSample() {
+            previews.forEach(v => v.pause());
+            workSample.classList.add('hidden');
+        }
 
         // --- State Management ---
         const state = { date: null, time: null, activity: null, food: null };
