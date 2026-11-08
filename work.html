@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نمونه کار | ORIGIN</title>
-    <meta name="description" content="نمونه کار: تیزر تبلیغاتی عمودی محصول قهوه ORIGIN">
-    <meta property="og:title" content="نمونه کار | ORIGIN — The Art of Coffee">
+    <title>نمونه کارها</title>
+    <meta name="description" content="نمونه کارها: تیزر محصول قهوه ORIGIN و تیزر انیمیشن سه‌بعدی کلینیک دندانپزشکی">
+    <meta property="og:title" content="نمونه کارها">
     <meta property="og:type" content="video.other">
     <meta property="og:image" content="media/origin-coffee-poster.jpg">
     <meta property="og:video" content="media/origin-coffee.mp4">
@@ -173,6 +173,7 @@
             color: var(--gold);
             direction: ltr;
             text-align: right;
+            font-variant-numeric: lining-nums;
         }
 
         .info .lead {
@@ -237,6 +238,24 @@
 
         .en { white-space: nowrap; }
 
+        .work + .work {
+            margin-top: 64px;
+            padding-top: 56px;
+            border-top: 1px solid var(--line);
+        }
+
+        .info h1.fa {
+            font-family: 'Vazirmatn', system-ui, sans-serif;
+            font-weight: 900;
+            font-size: clamp(2rem, 6.5vw, 3.1rem);
+            letter-spacing: 0;
+            line-height: 1.3;
+            direction: rtl;
+        }
+
+        footer a { color: var(--gold); text-decoration: none; font-weight: 500; }
+        footer a:hover { text-decoration: underline; }
+
         footer {
             margin-top: 48px;
             padding-top: 20px;
@@ -253,13 +272,14 @@
 </head>
 <body>
     <div class="wrap">
-        <div class="eyebrow">نمونه کار</div>
+        <div class="eyebrow">نمونه کارها</div>
 
-        <main class="work">
-            <figure class="player" id="player" style="margin: 0 auto;">
-                <video id="video" src="media/origin-coffee.mp4" poster="media/origin-coffee-poster.jpg"
+        <main>
+            <article class="work">
+            <figure class="player" style="margin: 0 auto;">
+                <video src="media/origin-coffee.mp4" poster="media/origin-coffee-poster.jpg"
                        preload="metadata" playsinline aria-label="تیزر ORIGIN — The Art of Coffee"></video>
-                <button class="play-btn" id="play" type="button" aria-label="پخش ویدیو"><span></span></button>
+                <button class="play-btn" type="button" aria-label="پخش ویدیو"><span></span></button>
             </figure>
 
             <section class="info">
@@ -279,25 +299,53 @@
                     <li><strong>محصول</strong>: معرفی بسته‌بندی ORIGIN کنار فنجان داغ</li>
                 </ol>
             </section>
+            </article>
+
+            <article class="work">
+            <figure class="player" style="margin: 0 auto;">
+                <video src="media/dental-3d.mp4" poster="media/dental-3d-poster.jpg"
+                       preload="metadata" playsinline aria-label="تیزر سه‌بعدی کلینیک دندانپزشکی"></video>
+                <button class="play-btn" type="button" aria-label="پخش ویدیو"><span></span></button>
+            </figure>
+
+            <section class="info">
+                <h1 class="fa">کلینیک دندانپزشکی</h1>
+                <p class="tagline">3D Animated Teaser</p>
+                <p class="lead">تیزر انیمیشن سه‌بعدی برای کلینیک دندانپزشکی؛ داستان کسی که لبخندش را پنهان می‌کرد تا روزی که دیگر لازم نبود.</p>
+
+                <ul class="meta">
+                    <li><span class="k">نوع کار</span><span class="v">تیزر انیمیشن سه‌بعدی</span></li>
+                    <li><span class="k">فرمت</span><span class="v">عمودی ۹:۱۶</span></li>
+                    <li><span class="k">مدت</span><span class="v">۲۹ ثانیه</span></li>
+                </ul>
+
+                <ol class="beats">
+                    <li><strong>سؤال</strong>: «چند بار لبخندت رو قایم کردی؟»</li>
+                    <li><strong>کلینیک</strong>: مراجعه و درمان در کلینیک</li>
+                    <li><strong>لبخند</strong>: «دیگه لازم نیست قایمش کنی.» و دعوت به رزرو نوبت</li>
+                </ol>
+            </section>
+            </article>
         </main>
 
-        <footer>ORIGIN — The Art of Coffee</footer>
+        <footer><a href="index.html">→ صفحه اصلی</a></footer>
     </div>
 
     <script>
-        const player = document.getElementById('player');
-        const video = document.getElementById('video');
-        const playBtn = document.getElementById('play');
-
-        playBtn.addEventListener('click', () => {
-            video.controls = true;
-            video.play();
-        });
-        video.addEventListener('play', () => player.classList.add('playing'));
-        video.addEventListener('ended', () => {
-            player.classList.remove('playing');
-            video.controls = false;
-            video.currentTime = 0;
+        const players = document.querySelectorAll('.player');
+        players.forEach((player) => {
+            const video = player.querySelector('video');
+            player.querySelector('.play-btn').addEventListener('click', () => {
+                players.forEach((other) => { if (other !== player) other.querySelector('video').pause(); });
+                video.controls = true;
+                video.play();
+            });
+            video.addEventListener('play', () => player.classList.add('playing'));
+            video.addEventListener('ended', () => {
+                player.classList.remove('playing');
+                video.controls = false;
+                video.currentTime = 0;
+            });
         });
     </script>
 </body>
